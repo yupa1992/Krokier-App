@@ -2,15 +2,10 @@ version: '3.8'
 
 services:
   krokier-app:
-    image: nginx:alpine
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: krokier-app
     ports:
       - "3000:80"
     restart: unless-stopped
-    command: >
-      sh -c "
-      echo 'Krokier App wird gestartet...' &&
-      echo 'WICHTIG: Bitte laden Sie den dist/ Ordner manuell hoch!' &&
-      echo 'Oder verwenden Sie die Repository-Methode für automatischen Build.' &&
-      nginx -g 'daemon off;'
-      "
