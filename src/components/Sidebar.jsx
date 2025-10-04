@@ -32,8 +32,12 @@ const Sidebar = ({ isLocked }) => {
   
   // Lade Symbole aus localStorage
   const loadSymbols = () => {
+    const SYMBOLS_VERSION = '2.0' // Version erhöhen um Cache zu invalidieren
+    const savedVersion = localStorage.getItem('symbolsVersion')
     const savedSymbols = localStorage.getItem('symbols')
-    if (savedSymbols) {
+    
+    // Prüfe ob Version aktuell ist
+    if (savedSymbols && savedVersion === SYMBOLS_VERSION) {
       setSymbols(JSON.parse(savedSymbols))
     } else {
       // Generiere alle PNG-Symbole aus dem assets/icons Ordner
@@ -47,6 +51,7 @@ const Sidebar = ({ isLocked }) => {
       }
       setSymbols(defaultSymbols)
       localStorage.setItem('symbols', JSON.stringify(defaultSymbols))
+      localStorage.setItem('symbolsVersion', SYMBOLS_VERSION)
     }
   }
 

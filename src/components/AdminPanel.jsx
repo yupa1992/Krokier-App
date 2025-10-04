@@ -33,9 +33,12 @@ const AdminPanel = ({ onClose, logo, onLogoChange }) => {
 
   // Symbole aus assets/icons laden
   useEffect(() => {
-    // Versuche gespeicherte Symbole zu laden
+    const SYMBOLS_VERSION = '2.0' // Version erhöhen um Cache zu invalidieren
+    const savedVersion = localStorage.getItem('symbolsVersion')
     const savedSymbols = localStorage.getItem('symbols')
-    if (savedSymbols) {
+    
+    // Prüfe ob Version aktuell ist
+    if (savedSymbols && savedVersion === SYMBOLS_VERSION) {
       setSymbols(JSON.parse(savedSymbols))
     } else {
       const loadedSymbols = []
@@ -48,6 +51,7 @@ const AdminPanel = ({ onClose, logo, onLogoChange }) => {
       }
       setSymbols(loadedSymbols)
       localStorage.setItem('symbols', JSON.stringify(loadedSymbols))
+      localStorage.setItem('symbolsVersion', SYMBOLS_VERSION)
     }
   }, [])
 
