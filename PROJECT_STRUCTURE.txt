@@ -1,0 +1,266 @@
+FEUERWEHR KROKIER-APP - PROJEKT STRUKTUR
+=========================================
+
+02_krokier_app_native/
+│
+├── 📄 Configuration Files
+│   ├── package.json              # Dependencies & Scripts
+│   ├── vite.config.js            # Vite Build Configuration
+│   ├── tailwind.config.js        # TailwindCSS Configuration
+│   ├── postcss.config.js         # PostCSS Configuration
+│   ├── .eslintrc.cjs             # ESLint Rules
+│   ├── .gitignore                # Git Ignore Rules
+│   └── .dockerignore             # Docker Ignore Rules
+│
+├── 🐳 Deployment Files
+│   ├── Dockerfile                # Docker Image Definition
+│   ├── docker-compose.yml        # Docker Compose Configuration
+│   ├── nginx.conf                # Nginx Server Configuration
+│   ├── vercel.json               # Vercel Deployment Config
+│   └── netlify.toml              # Netlify Deployment Config
+│
+├── 📚 Documentation
+│   ├── README.md                 # Project Overview
+│   ├── QUICKSTART.md             # Quick Start Guide
+│   ├── FEATURES.md               # Detailed Feature List
+│   ├── DEPLOYMENT.md             # Deployment Instructions
+│   ├── PROJECT_SUMMARY.md        # Complete Project Summary
+│   ├── EXISTING_SYMBOLS.md       # Integration Guide for PNG Symbols
+│   └── PROJECT_STRUCTURE.txt     # This File
+│
+├── 🚀 Quick Start
+│   ├── start.bat                 # Windows Quick Start Script
+│   └── index.html                # HTML Entry Point
+│
+├── 📁 Source Code (src/)
+│   ├── main.jsx                  # React Entry Point
+│   ├── App.jsx                   # Main Application Component
+│   ├── index.css                 # Global Styles + Tailwind
+│   │
+│   └── components/
+│       ├── MapComponent.jsx      # Leaflet Map + Drag & Drop
+│       ├── Toolbar.jsx           # Top Bar with Actions
+│       ├── Sidebar.jsx           # Symbol Library
+│       └── ColorPalette.jsx      # Color Selection
+│
+├── 🎨 Public Assets (public/)
+│   ├── fire-icon.svg             # App Favicon
+│   │
+│   └── assets/
+│       └── icons/                # Fire Department Symbols
+│           ├── fire-truck.svg    # 🚒 Fire Truck
+│           ├── ambulance.svg     # 🚑 Ambulance
+│           ├── fire.svg          # 🔥 Fire
+│           ├── water-source.svg  # 💧 Water Source
+│           ├── command-post.svg  # 🏠 Command Post
+│           ├── danger.svg        # ⚠️ Danger
+│           ├── person.svg        # 👤 Person
+│           ├── building.svg      # 🏢 Building
+│           ├── hydrant.svg       # 🚰 Hydrant
+│           ├── ladder.svg        # 🪜 Ladder
+│           ├── hose.svg          # 🔗 Hose
+│           └── barrier.svg       # 🚧 Barrier
+│
+└── 📦 Existing Symbols (Kroki_Symbole/)
+    └── 2x/                       # High-Res PNG Symbols
+        ├── Element 10@2x.png     # (130+ symbols available)
+        ├── Element 11@2x.png
+        └── ...
+
+
+COMPONENT ARCHITECTURE
+======================
+
+App.jsx (Root)
+│
+├── <DndProvider>                 # Drag & Drop Context
+│   │
+│   ├── <Toolbar>                 # Top Navigation Bar
+│   │   ├── Live Clock
+│   │   ├── Save Button
+│   │   ├── Load Button
+│   │   ├── Export Menu (PNG, PDF, GeoJSON)
+│   │   └── Fullscreen Toggle
+│   │
+│   └── <Main Layout>
+│       │
+│       ├── <MapComponent>        # Leaflet Map
+│       │   ├── <TileLayer>       # OpenStreetMap
+│       │   ├── <DrawControl>     # Drawing Tools
+│       │   ├── <DropZone>        # Drag & Drop Target
+│       │   └── <DraggableMarker> # Placed Symbols
+│       │
+│       ├── <ColorPalette>        # Color Picker (Overlay)
+│       │   ├── Preset Colors
+│       │   └── Custom Color Input
+│       │
+│       └── <Sidebar>             # Symbol Library
+│           └── <DraggableIcon>   # Draggable Symbols
+
+
+TECHNOLOGY STACK
+================
+
+Frontend Framework:
+  - React 18.2
+  - Vite 5.0 (Build Tool)
+
+Mapping:
+  - React-Leaflet 4.2
+  - Leaflet 1.9.4
+  - Leaflet-Draw 1.0.4
+
+Drag & Drop:
+  - react-dnd 16.0
+  - react-dnd-html5-backend 16.0
+
+Export:
+  - html2canvas 1.4 (PNG)
+  - jsPDF 2.5 (PDF)
+
+Styling:
+  - TailwindCSS 3.3
+  - PostCSS 8.4
+  - Autoprefixer 10.4
+
+Icons:
+  - Lucide React 0.294
+
+Development:
+  - ESLint 8.55
+  - TypeScript Types (React)
+
+
+DATA FLOW
+=========
+
+User Action → Component State → Map Update → Save/Export
+
+1. Drag Symbol from Sidebar
+   ↓
+2. Drop on Map (DropZone)
+   ↓
+3. Add to symbols[] state
+   ↓
+4. Render as DraggableMarker
+   ↓
+5. User can move/label/delete
+   ↓
+6. Save as JSON or Export
+
+
+FILE SIZES (Approximate)
+========================
+
+Source Code:
+  - App.jsx: 3.2 KB
+  - MapComponent.jsx: 6.5 KB
+  - Toolbar.jsx: 7.8 KB
+  - Sidebar.jsx: 2.8 KB
+  - ColorPalette.jsx: 1.5 KB
+  - index.css: 1.2 KB
+
+Assets:
+  - SVG Icons: ~1-2 KB each
+  - Total Assets: ~20 KB
+
+Build Output:
+  - Minified JS: ~300 KB
+  - Minified CSS: ~50 KB
+  - Total (gzipped): ~500 KB
+
+
+DEPLOYMENT OPTIONS
+==================
+
+Local Development:
+  npm run dev → http://localhost:3000
+
+Docker:
+  docker-compose up -d → http://localhost:3000
+
+Cloud (Free):
+  - Vercel: vercel deploy
+  - Netlify: netlify deploy
+  - Railway: railway up
+  - Render: Connect GitHub repo
+
+Production Build:
+  npm run build → dist/ folder
+
+
+FEATURES CHECKLIST
+==================
+
+✅ Interactive Map (React-Leaflet + OpenStreetMap)
+✅ Live Clock in Toolbar
+✅ Fullscreen Mode
+✅ Color Palette (8 colors + custom)
+✅ Symbol Library (12 fire department icons)
+✅ Drag & Drop (react-dnd)
+✅ Symbol Management (move, label, delete)
+✅ Drawing Tools (lines, polygons, shapes)
+✅ Color Selection for Drawings
+✅ Save as JSON
+✅ Load from JSON
+✅ Export as PNG (html2canvas)
+✅ Export as PDF (jsPDF)
+✅ Export as GeoJSON
+✅ Responsive Design
+✅ Modern UI (TailwindCSS)
+✅ Docker Support
+✅ Cloud Deployment Ready
+✅ Comprehensive Documentation
+
+
+NEXT STEPS
+==========
+
+1. Install Dependencies:
+   npm install
+
+2. Start Development Server:
+   npm run dev
+
+3. Open Browser:
+   http://localhost:3000
+
+4. Start Using:
+   - Drag symbols onto map
+   - Draw areas with tools
+   - Save and export
+
+5. Deploy (Optional):
+   - Docker: docker-compose up -d
+   - Vercel: vercel
+   - Netlify: netlify deploy
+
+
+SUPPORT
+=======
+
+Documentation:
+  - README.md - Overview
+  - QUICKSTART.md - Getting Started
+  - FEATURES.md - Feature Details
+  - DEPLOYMENT.md - Deployment Guide
+
+Issues:
+  - Check browser console (F12)
+  - Review npm run dev output
+  - Create issue in repository
+
+
+LICENSE
+=======
+
+MIT License - Free for commercial and private use
+
+
+CREATED BY
+==========
+
+Cascade AI Assistant
+Date: 2025-10-03
+Version: 1.0.0
+Status: Production Ready ✅
