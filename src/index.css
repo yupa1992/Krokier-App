@@ -1,0 +1,201 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Entferne Tile-Grenzen in Leaflet */
+.leaflet-tile {
+  border: none !important;
+  outline: none !important;
+  image-rendering: auto !important;
+  -webkit-backface-visibility: hidden !important;
+  backface-visibility: hidden !important;
+}
+
+/* Entferne blaue Rahmen um Marker/Symbole */
+.leaflet-marker-icon {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+/* Entferne Selection-Boxen */
+.leaflet-marker-icon > div {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+/* Entferne alle Rahmen von Custom Markers */
+.custom-marker {
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+}
+
+/* Entferne ALLE Divs in Markern (außer User-Location und Rotation-Handle) */
+.leaflet-marker-icon div:not(.user-location-marker):not(.user-location-marker *):not(.rotation-handle),
+.custom-marker div:not(.rotation-handle) {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Rotation-Handle muss sichtbar sein! */
+.rotation-handle {
+  background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%) !important;
+  border: 3px solid white !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3), 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+  cursor: grab !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 18px !important;
+  color: white !important;
+  font-weight: bold !important;
+  transition: all 0.2s ease !important;
+}
+
+.rotation-handle:hover {
+  transform: translateX(-50%) scale(1.15) rotate(15deg) !important;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.4), 0 0 0 3px rgba(59, 130, 246, 0.3) !important;
+  background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
+}
+
+.rotation-handle:active {
+  cursor: grabbing !important;
+  transform: translateX(-50%) scale(1.0) rotate(0deg) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+}
+
+/* Pulse Animation */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+}
+
+/* Selection-Rahmen (blauer Rahmen wenn Symbol selektiert) - MUSS UNTER dem Icon sein */
+.custom-marker > div > div:first-child {
+  border: 3px dashed #3B82F6 !important;
+  background: rgba(59, 130, 246, 0.1) !important;
+  z-index: 1 !important;
+}
+
+/* Das Icon-Bild MUSS ÜBER dem Rahmen sein */
+.custom-marker img {
+  position: relative !important;
+  z-index: 100 !important;
+}
+
+/* User-Location Marker darf Farbe haben */
+.user-location-marker,
+.user-location-marker * {
+  background: inherit !important;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.font-monocode {
+  font-family: 'Roboto Mono', source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* User Location Marker Animation */
+@keyframes pulse {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: translate(-50%, -50%) scale(1.5);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(2);
+  }
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Leaflet custom styles */
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+  z-index: 0;
+}
+
+.leaflet-draw-toolbar a {
+  background-color: white;
+}
+
+.custom-marker {
+  background: transparent;
+  border: none;
+}
+
+.custom-marker img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Draggable symbol styles */
+.draggable-symbol {
+  cursor: move;
+  transition: transform 0.2s;
+}
+
+.draggable-symbol:hover {
+  transform: scale(1.1);
+}
+
+.draggable-symbol:active {
+  cursor: grabbing;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
