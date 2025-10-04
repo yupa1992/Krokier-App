@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
-import { Clock, Maximize, Minimize, Save, Upload, Lock, Unlock, Settings, Download, Menu, X } from 'lucide-react'
+import { Clock, Maximize, Minimize, Upload, Lock, Unlock, Settings, Download, Menu, X, MapPin, FilePlus } from 'lucide-react'
 import domtoimage from 'dom-to-image-more'
 import jsPDF from 'jspdf'
 
-const Toolbar = ({ onSave, onLoad, onToggleFullscreen, isFullscreen, mapRef, isMapLocked, onToggleLock, onShowAdmin, logo }) => {
+const Toolbar = ({ onNewDrawing, onSearchLocation, onLoad, onToggleFullscreen, isFullscreen, mapRef, isMapLocked, onToggleLock, onShowAdmin, logo }) => {
   const [currentTime, setCurrentTime] = useState(new Date())
   const [showExportMenu, setShowExportMenu] = useState(false)
   const [einsatzort, setEinsatzort] = useState('')
@@ -127,17 +127,26 @@ const Toolbar = ({ onSave, onLoad, onToggleFullscreen, isFullscreen, mapRef, isM
           {/* Aktionen */}
           <div className="flex items-center space-x-2">
             <button
-              onClick={onSave}
-              className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg transition-colors font-semibold shadow-md"
-              title="Speichern"
+              onClick={onNewDrawing}
+              className="flex items-center space-x-2 bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg transition-colors font-semibold shadow-md"
+              title="Neue Zeichnung"
             >
-              <Save className="w-5 h-5" />
-              <span>Speichern</span>
+              <FilePlus className="w-5 h-5" />
+              <span>Neue Zeichnung</span>
+            </button>
+
+            <button
+              onClick={onSearchLocation}
+              className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors font-semibold shadow-md"
+              title="Standort suchen"
+            >
+              <MapPin className="w-5 h-5" />
+              <span>Standort suchen</span>
             </button>
 
             <button
               onClick={onLoad}
-              className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors font-semibold shadow-md"
+              className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg transition-colors font-semibold shadow-md"
               title="Laden"
             >
               <Upload className="w-5 h-5" />
@@ -249,16 +258,24 @@ const Toolbar = ({ onSave, onLoad, onToggleFullscreen, isFullscreen, mapRef, isM
             
             <div className="grid grid-cols-2 gap-2">
               <button
-                onClick={() => { onSave(); setShowMobileMenu(false); }}
-                className="flex items-center justify-center space-x-2 bg-green-600 px-3 py-2 rounded-lg text-sm"
+                onClick={() => { onNewDrawing(); setShowMobileMenu(false); }}
+                className="flex items-center justify-center space-x-2 bg-red-600 px-3 py-2 rounded-lg text-sm"
               >
-                <Save className="w-4 h-4" />
-                <span>Speichern</span>
+                <FilePlus className="w-4 h-4" />
+                <span>Neue Zeichnung</span>
+              </button>
+
+              <button
+                onClick={() => { onSearchLocation(); setShowMobileMenu(false); }}
+                className="flex items-center justify-center space-x-2 bg-blue-600 px-3 py-2 rounded-lg text-sm"
+              >
+                <MapPin className="w-4 h-4" />
+                <span>Standort</span>
               </button>
 
               <button
                 onClick={() => { onLoad(); setShowMobileMenu(false); }}
-                className="flex items-center justify-center space-x-2 bg-blue-600 px-3 py-2 rounded-lg text-sm"
+                className="flex items-center justify-center space-x-2 bg-green-600 px-3 py-2 rounded-lg text-sm"
               >
                 <Upload className="w-4 h-4" />
                 <span>Laden</span>

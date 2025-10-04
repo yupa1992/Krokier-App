@@ -40,6 +40,36 @@ function App() {
   const [userLocation, setUserLocation] = useState(null)
   const mapRef = useRef(null)
 
+  // Auto-Save: Lade gespeicherte Daten beim Start
+  useEffect(() => {
+    const savedData = localStorage.getItem('krokierAppData')
+    if (savedData) {
+      try {
+        const data = JSON.parse(savedData)
+        if (data.symbols) setSymbols(data.symbols)
+        if (data.drawings) setDrawings(data.drawings)
+        if (data.images) setImages(data.images)
+        if (data.logo) setLogo(data.logo)
+        console.log('✅ Gespeicherte Daten geladen')
+      } catch (error) {
+        console.error('Fehler beim Laden der Daten:', error)
+      }
+    }
+  }, [])
+
+  // Auto-Save: Speichere Änderungen automatisch
+  useEffect(() => {
+    const data = {
+      version: '2.0',
+      timestamp: new Date().toISOString(),
+      symbols,
+      drawings,
+      images,
+      logo
+    }
+    localStorage.setItem('krokierAppData', JSON.stringify(data))
+  }, [symbols, drawings, images, logo])
+
   // Synchronisiere Symbol-Namen mit localStorage
   useEffect(() => {
     const updateSymbolNames = () => {
@@ -127,23 +157,30 @@ function App() {
     setImages(images.filter(img => img.id !== id))
   }
 
-  const handleSave = () => {
-    const data = {
-      version: '2.0',
-      timestamp: new Date().toISOString(),
-      symbols,
-      drawings,
-      images,
-      logo
-    }
+  // Neue Zeichnung beginnen
+  const handleNewDrawing = () => {
+    const confirmed = window.confirm(
+      '⚠️ Möchten Sie wirklich eine neue Zeichnung beginnen?\n\nAlle aktuellen Symbole, Zeichnungen und Bilder werden gelöscht.\n\nDiese Aktion kann nicht rückgängig gemacht werden!'
+    )
     
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `krokier-${Date.now()}.json`
-    a.click()
-    URL.revokeObjectURL(url)
+    if (confirmed) {
+      setSymbols([])
+      setDrawings([])
+      setImages([])
+      localStorage.removeItem('krokierAppData')
+      console.log('🗑️ Neue Zeichnung gestartet - alle Daten gelöscht')
+    }
+  }
+
+  // Standort suchen
+  const handleSearchLocation = () => {
+    const location = prompt('🔍 Standort suchen:\n\nGeben Sie eine Adresse, Stadt oder Koordinaten ein:')
+    
+    if (location && mapRef.current) {
+      // Hier könnte eine Geocoding-API integriert werden
+      // Für jetzt zeigen wir eine Info
+      alert(`🔍 Standortsuche: "${location}"\n\nHinweis: Geocoding-Funktion wird in einer zukünftigen Version implementiert.\n\nVerwenden Sie vorerst die Zoom-Buttons und ziehen Sie die Karte manuell.`)
+    }
   }
 
   const handleLoad = (event) => {
@@ -179,7 +216,8 @@ function App() {
     <DndProvider backend={MultiBackend} options={HTML5toTouch}>
       <div className="flex flex-col h-screen bg-slate-50">
         <Toolbar
-          onSave={handleSave}
+          onNewDrawing={handleNewDrawing}
+          onSearchLocation={handleSearchLocation}
           onLoad={handleLoad}
           onToggleFullscreen={toggleFullscreen}
           isFullscreen={isFullscreen}
