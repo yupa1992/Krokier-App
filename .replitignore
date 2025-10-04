@@ -1,0 +1,28 @@
+# Replit Ignore File
+# Diese Dateien werden nicht auf Replit hochgeladen
+
+# Dependencies (werden automatisch installiert)
+node_modules/
+
+# Archive
+_archive/
+
+# Build output
+dist/
+dist-ssr/
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Git
+.git/
+.gitignore
