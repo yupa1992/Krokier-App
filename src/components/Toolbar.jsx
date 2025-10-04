@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Clock, Maximize, Minimize, Save, Upload, Lock, Unlock, Settings, Download } from 'lucide-react'
+import { Clock, Maximize, Minimize, Save, Upload, Lock, Unlock, Settings, Download, Menu, X } from 'lucide-react'
 import domtoimage from 'dom-to-image-more'
 import jsPDF from 'jspdf'
 
@@ -87,9 +87,12 @@ const Toolbar = ({ onSave, onLoad, onToggleFullscreen, isFullscreen, mapRef, isM
     }
   }
 
+  const [showMobileMenu, setShowMobileMenu] = useState(false)
+
   return (
     <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-slate-800 to-slate-900 text-white shadow-lg z-[1000] border-b-4 border-blue-500">
-      <div className="flex items-center justify-between px-6 py-3">
+      {/* Desktop View */}
+      <div className="hidden lg:flex items-center justify-between px-6 py-3">
         {/* Logo und Titel */}
         <div className="flex items-center space-x-4">
           {logo && (
@@ -208,6 +211,95 @@ const Toolbar = ({ onSave, onLoad, onToggleFullscreen, isFullscreen, mapRef, isM
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Mobile View */}
+      <div className="lg:hidden">
+        <div className="flex items-center justify-between px-4 py-3">
+          {/* Logo & Title */}
+          <div className="flex items-center space-x-2">
+            {logo && (
+              <img src={logo} alt="Logo" className="h-8 w-auto object-contain" />
+            )}
+            <h1 className="text-lg font-bold">Krokier App</h1>
+          </div>
+
+          {/* Time */}
+          <div className="text-sm font-mono">{formatTime(currentTime)}</div>
+
+          {/* Menu Button */}
+          <button
+            onClick={() => setShowMobileMenu(!showMobileMenu)}
+            className="p-2 bg-slate-700 rounded-lg"
+          >
+            {showMobileMenu ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
+
+        {/* Mobile Menu */}
+        {showMobileMenu && (
+          <div className="bg-slate-800 border-t border-slate-700 px-4 py-3 space-y-2">
+            <input
+              type="text"
+              value={einsatzort}
+              onChange={(e) => setEinsatzort(e.target.value)}
+              placeholder="Einsatzort..."
+              className="w-full px-3 py-2 bg-slate-700 text-white rounded-lg text-sm"
+            />
+            
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={() => { onSave(); setShowMobileMenu(false); }}
+                className="flex items-center justify-center space-x-2 bg-green-600 px-3 py-2 rounded-lg text-sm"
+              >
+                <Save className="w-4 h-4" />
+                <span>Speichern</span>
+              </button>
+
+              <button
+                onClick={() => { onLoad(); setShowMobileMenu(false); }}
+                className="flex items-center justify-center space-x-2 bg-blue-600 px-3 py-2 rounded-lg text-sm"
+              >
+                <Upload className="w-4 h-4" />
+                <span>Laden</span>
+              </button>
+
+              <button
+                onClick={() => { setShowExportMenu(!showExportMenu); }}
+                className="flex items-center justify-center space-x-2 bg-orange-600 px-3 py-2 rounded-lg text-sm"
+              >
+                <Download className="w-4 h-4" />
+                <span>Export</span>
+              </button>
+
+              <button
+                onClick={() => { onToggleLock(); setShowMobileMenu(false); }}
+                className={`flex items-center justify-center space-x-2 px-3 py-2 rounded-lg text-sm ${
+                  isMapLocked ? 'bg-red-600' : 'bg-yellow-600'
+                }`}
+              >
+                {isMapLocked ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
+                <span>{isMapLocked ? 'Gesperrt' : 'Entsperrt'}</span>
+              </button>
+
+              <button
+                onClick={() => { onShowAdmin(); setShowMobileMenu(false); }}
+                className="flex items-center justify-center space-x-2 bg-purple-600 px-3 py-2 rounded-lg text-sm"
+              >
+                <Settings className="w-4 h-4" />
+                <span>Admin</span>
+              </button>
+
+              <button
+                onClick={() => { onToggleFullscreen(); setShowMobileMenu(false); }}
+                className="flex items-center justify-center space-x-2 bg-slate-700 px-3 py-2 rounded-lg text-sm"
+              >
+                {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
+                <span>Vollbild</span>
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

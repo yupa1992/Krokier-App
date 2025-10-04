@@ -1,27 +1,39 @@
 import { useDrag } from 'react-dnd'
 import { Library, Upload } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import { getEmptyImage } from 'react-dnd-html5-backend'
 
 const DraggableIcon = ({ icon, name, isLocked }) => {
-  const [{ isDragging }, drag] = useDrag(() => ({
+  const [{ isDragging }, drag, preview] = useDrag(() => ({
     type: 'SYMBOL',
     item: { icon, name },
     collect: (monitor) => ({
       isDragging: monitor.isDragging()
     }),
     canDrag: !isLocked
-  }), [isLocked])
+  }), [isLocked, icon, name])
+
+  // Verstecke das Standard-HTML5-Preview (für Touch wird automatisch ein Preview erstellt)
+  useEffect(() => {
+    preview(getEmptyImage(), { captureDraggingState: true })
+  }, [preview])
 
   return (
     <div
       ref={drag}
-      className={`draggable-symbol bg-white p-2 rounded-lg shadow-md hover:shadow-xl transition-all border-2 border-transparent hover:border-blue-400 ${
+      className={`draggable-symbol bg-white p-2 rounded-lg shadow-md hover:shadow-xl active:shadow-2xl transition-all border-2 border-transparent hover:border-blue-400 active:border-blue-500 ${
         isDragging ? 'opacity-50' : 'opacity-100'
-      } ${isLocked ? 'cursor-not-allowed opacity-50' : 'cursor-move'}`}
+      } ${isLocked ? 'cursor-not-allowed opacity-50' : 'cursor-move touch-none select-none'}`}
       title={name}
+      style={{ touchAction: 'none' }}
     >
-      <img src={icon} alt={name} className="w-16 h-16 object-contain mx-auto" />
-      <p className="text-xs text-center mt-1 text-gray-700 font-medium truncate">{name}</p>
+      <img 
+        src={icon} 
+        alt={name} 
+        className="w-16 h-16 object-contain mx-auto pointer-events-none" 
+        draggable={false}
+      />
+      <p className="text-xs text-center mt-1 text-gray-700 font-medium truncate pointer-events-none">{name}</p>
     </div>
   )
 }
@@ -81,13 +93,13 @@ const Sidebar = ({ isLocked }) => {
   )
 
   return (
-    <div className="w-96 bg-slate-100 border-l border-slate-300 overflow-y-auto shadow-2xl">
-      <div className="p-5 bg-gradient-to-r from-slate-700 to-slate-600 text-white sticky top-0 z-10 shadow-lg">
-        <div className="flex items-center space-x-3 mb-3">
-          <Library className="w-7 h-7 text-blue-400" />
-          <h2 className="text-xl font-bold">Symbol-Bibliothek</h2>
+    <div className="w-full lg:w-96 bg-slate-100 border-l border-slate-300 overflow-y-auto shadow-2xl">
+      <div className="p-3 lg:p-5 bg-gradient-to-r from-slate-700 to-slate-600 text-white sticky top-0 z-10 shadow-lg">
+        <div className="flex items-center space-x-2 lg:space-x-3 mb-2 lg:mb-3">
+          <Library className="w-5 h-5 lg:w-7 lg:h-7 text-blue-400" />
+          <h2 className="text-lg lg:text-xl font-bold">Symbol-Bibliothek</h2>
         </div>
-        <p className="text-sm opacity-90 mb-3">
+        <p className="text-xs lg:text-sm opacity-90 mb-2 lg:mb-3">
           {isLocked ? '🔒 Karte ist gesperrt' : 'Symbole auf Karte ziehen'}
         </p>
         <input
@@ -95,11 +107,11 @@ const Sidebar = ({ isLocked }) => {
           placeholder="Symbole suchen..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full px-4 py-2 rounded-lg bg-slate-800 text-white placeholder-slate-400 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 lg:px-4 py-2 rounded-lg bg-slate-800 text-white placeholder-slate-400 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm lg:text-base"
         />
       </div>
 
-      <div className="p-4 grid grid-cols-3 gap-3">
+      <div className="p-2 lg:p-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-2 lg:gap-3">
         {filteredSymbols.map((symbol, index) => (
           <DraggableIcon key={index} icon={symbol.icon} name={symbol.name} isLocked={isLocked} />
         ))}

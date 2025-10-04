@@ -1,10 +1,30 @@
 import { useState, useRef, useEffect } from 'react'
 import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
+import { TouchBackend } from 'react-dnd-touch-backend'
+import { MouseTransition, TouchTransition, MultiBackend } from 'react-dnd-multi-backend'
 import MapComponent from './components/MapComponent'
 import Toolbar from './components/Toolbar'
 import Sidebar from './components/Sidebar'
 import AdminPanel from './components/AdminPanel'
+
+// Multi-Backend Konfiguration für Touch und Mouse
+const HTML5toTouch = {
+  backends: [
+    {
+      id: 'html5',
+      backend: HTML5Backend,
+      transition: MouseTransition,
+    },
+    {
+      id: 'touch',
+      backend: TouchBackend,
+      options: { enableMouseEvents: true },
+      preview: true,
+      transition: TouchTransition,
+    },
+  ],
+}
 
 function App() {
   const [symbols, setSymbols] = useState([])
@@ -156,7 +176,7 @@ function App() {
   }
 
   return (
-    <DndProvider backend={HTML5Backend}>
+    <DndProvider backend={MultiBackend} options={HTML5toTouch}>
       <div className="flex flex-col h-screen bg-slate-50">
         <Toolbar
           onSave={handleSave}
@@ -173,8 +193,8 @@ function App() {
           logo={logo}
         />
         
-        <div className="flex flex-1 overflow-hidden">
-          <div className="flex-1 relative">
+        <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
+          <div className="flex-1 relative order-1 lg:order-1">
             <MapComponent
               ref={mapRef}
               symbols={symbols}
@@ -194,7 +214,9 @@ function App() {
             />
           </div>
           
-          <Sidebar isLocked={isMapLocked} />
+          <div className="h-64 lg:h-auto lg:w-96 order-2 lg:order-2 overflow-y-auto">
+            <Sidebar isLocked={isMapLocked} />
+          </div>
         </div>
 
         {showAdmin && (
