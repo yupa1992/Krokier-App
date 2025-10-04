@@ -36,6 +36,7 @@ _archive
 .env
 .env.local
 .env.production
+create-env.ps1
 
 # Database files
 server/data.json
