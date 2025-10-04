@@ -1,7 +1,8 @@
 import { useDrag } from 'react-dnd'
-import { Library, Upload } from 'lucide-react'
+import { Library, ChevronDown, ChevronRight } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { getEmptyImage } from 'react-dnd-html5-backend'
+import { symbolCategories, getAllSymbols } from '../symbolMapping'
 
 const DraggableIcon = ({ icon, name, isLocked }) => {
   const [{ isDragging }, drag, preview] = useDrag(() => ({
@@ -40,57 +41,39 @@ const DraggableIcon = ({ icon, name, isLocked }) => {
 
 const Sidebar = ({ isLocked }) => {
   const [searchTerm, setSearchTerm] = useState('')
-  const [symbols, setSymbols] = useState([])
-  
-  // Lade Symbole aus localStorage
-  const loadSymbols = () => {
-    const SYMBOLS_VERSION = '2.0' // Version erhöhen um Cache zu invalidieren
-    const savedVersion = localStorage.getItem('symbolsVersion')
-    const savedSymbols = localStorage.getItem('symbols')
-    
-    // Prüfe ob Version aktuell ist
-    if (savedSymbols && savedVersion === SYMBOLS_VERSION) {
-      setSymbols(JSON.parse(savedSymbols))
-    } else {
-      // Generiere alle PNG-Symbole aus dem assets/icons Ordner
-      const defaultSymbols = []
-      for (let i = 1; i <= 147; i++) {
-        defaultSymbols.push({
-          id: i,
-          icon: `/assets/icons/Element ${i}@2x.png`,
-          name: `Element ${i}`
-        })
-      }
-      setSymbols(defaultSymbols)
-      localStorage.setItem('symbols', JSON.stringify(defaultSymbols))
-      localStorage.setItem('symbolsVersion', SYMBOLS_VERSION)
-    }
-  }
+  const [expandedCategories, setExpandedCategories] = useState({})
+  const [allSymbols] = useState(getAllSymbols())
 
+  // Alle Kategorien standardmäßig aufklappen
   useEffect(() => {
-    loadSymbols()
-
-    // Lausche auf localStorage-Änderungen
-    const handleStorageChange = (e) => {
-      if (e.key === 'symbols' || e.type === 'storage') {
-        loadSymbols()
-      }
-    }
-
-    window.addEventListener('storage', handleStorageChange)
-    
-    // Custom Event für lokale Änderungen
-    window.addEventListener('symbolsUpdated', loadSymbols)
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange)
-      window.removeEventListener('symbolsUpdated', loadSymbols)
-    }
+    const expanded = {}
+    symbolCategories.forEach(cat => {
+      expanded[cat.category] = true
+    })
+    setExpandedCategories(expanded)
   }, [])
 
-  const filteredSymbols = symbols.filter(symbol =>
-    symbol.name.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const toggleCategory = (categoryName) => {
+    setExpandedCategories(prev => ({
+      ...prev,
+      [categoryName]: !prev[categoryName]
+    }))
+  }
+
+  // Filter-Logik
+  const getFilteredCategories = () => {
+    if (!searchTerm) return symbolCategories
+    
+    return symbolCategories.map(category => ({
+      ...category,
+      symbols: category.symbols.filter(symbol =>
+        symbol.name.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    })).filter(category => category.symbols.length > 0)
+  }
+
+  const filteredCategories = getFilteredCategories()
+  const totalSymbols = allSymbols.length
 
   return (
     <div className="h-full w-full bg-slate-100 border-l border-slate-300 flex flex-col shadow-2xl">
@@ -111,17 +94,49 @@ const Sidebar = ({ isLocked }) => {
         />
       </div>
 
-      <div className="flex-1 overflow-y-auto p-2 md:p-3">
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-          {filteredSymbols.map((symbol, index) => (
-            <DraggableIcon key={index} icon={symbol.icon} name={symbol.name} isLocked={isLocked} />
-          ))}
-        </div>
+      <div className="flex-1 overflow-y-auto">
+        {filteredCategories.map((category) => (
+          <div key={category.category} className="border-b border-slate-300">
+            <button
+              onClick={() => toggleCategory(category.category)}
+              className="w-full px-3 py-2 bg-slate-200 hover:bg-slate-300 flex items-center justify-between transition-colors"
+            >
+              <div className="flex items-center space-x-2">
+                <div 
+                  className="w-3 h-3 rounded-full" 
+                  style={{ backgroundColor: category.color }}
+                />
+                <span className="text-sm font-semibold text-slate-800">{category.category}</span>
+                <span className="text-xs text-slate-600">({category.symbols.length})</span>
+              </div>
+              {expandedCategories[category.category] ? (
+                <ChevronDown className="w-4 h-4 text-slate-600" />
+              ) : (
+                <ChevronRight className="w-4 h-4 text-slate-600" />
+              )}
+            </button>
+            
+            {expandedCategories[category.category] && (
+              <div className="p-2 bg-white">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                  {category.symbols.map((symbol) => (
+                    <DraggableIcon 
+                      key={symbol.id} 
+                      icon={symbol.icon} 
+                      name={symbol.name} 
+                      isLocked={isLocked} 
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
       </div>
 
-      {filteredSymbols.length === 0 && (
+      {filteredCategories.length === 0 && (
         <div className="flex-1 flex items-center justify-center text-gray-500">
-          <div className="text-center">
+          <div className="text-center p-4">
             <p className="text-base font-medium">Keine Symbole gefunden</p>
             <p className="text-xs mt-1">Anderen Suchbegriff versuchen</p>
           </div>
@@ -130,7 +145,7 @@ const Sidebar = ({ isLocked }) => {
 
       <div className="p-3 bg-white border-t border-slate-300 flex-shrink-0">
         <div className="text-xs text-slate-600 text-center">
-          <strong>{symbols.length}</strong> Symbole verfügbar
+          <strong>{totalSymbols}</strong> Symbole verfügbar
         </div>
       </div>
     </div>
