@@ -1,17 +1,13 @@
-# Build stage
-FROM node:18-alpine as build
+# Build stage - Use full Node image instead of Alpine
+FROM node:18 as build
 
 WORKDIR /app
-
-# Install build dependencies for native modules
-RUN apk add --no-cache python3 make g++ git
 
 # Copy package files
 COPY package*.json ./
 
-# Clean install with verbose logging
-RUN npm install --legacy-peer-deps --verbose || \
-    (echo "npm install failed, trying with --force" && npm install --force)
+# Install dependencies
+RUN npm install --legacy-peer-deps
 
 # Copy source code
 COPY . .
@@ -19,7 +15,7 @@ COPY . .
 # Build the app
 RUN npm run build
 
-# Production stage
+# Production stage - Use Alpine for smaller final image
 FROM nginx:alpine
 
 # Copy built files to nginx
