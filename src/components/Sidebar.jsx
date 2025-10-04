@@ -93,49 +93,44 @@ const Sidebar = ({ isLocked }) => {
   )
 
   return (
-    <div className="w-full lg:w-96 bg-slate-100 border-l border-slate-300 overflow-y-auto shadow-2xl">
-      <div className="p-3 lg:p-5 bg-gradient-to-r from-slate-700 to-slate-600 text-white sticky top-0 z-10 shadow-lg">
-        <div className="flex items-center space-x-2 lg:space-x-3 mb-2 lg:mb-3">
-          <Library className="w-5 h-5 lg:w-7 lg:h-7 text-blue-400" />
-          <h2 className="text-lg lg:text-xl font-bold">Symbol-Bibliothek</h2>
+    <div className="h-full w-full bg-slate-100 border-l border-slate-300 flex flex-col shadow-2xl">
+      <div className="p-3 md:p-4 bg-gradient-to-r from-slate-700 to-slate-600 text-white shadow-lg flex-shrink-0">
+        <div className="flex items-center space-x-2 mb-2">
+          <Library className="w-5 h-5 md:w-6 md:h-6 text-blue-400" />
+          <h2 className="text-base md:text-lg font-bold">Symbole</h2>
         </div>
-        <p className="text-xs lg:text-sm opacity-90 mb-2 lg:mb-3">
-          {isLocked ? '🔒 Karte ist gesperrt' : 'Symbole auf Karte ziehen'}
+        <p className="text-xs opacity-90 mb-2">
+          {isLocked ? '🔒 Gesperrt' : 'Auf Karte ziehen'}
         </p>
         <input
           type="text"
-          placeholder="Symbole suchen..."
+          placeholder="Suchen..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full px-3 lg:px-4 py-2 rounded-lg bg-slate-800 text-white placeholder-slate-400 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm lg:text-base"
+          className="w-full px-3 py-2 rounded-lg bg-slate-800 text-white placeholder-slate-400 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
         />
       </div>
 
-      <div className="p-2 lg:p-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-2 lg:gap-3">
-        {filteredSymbols.map((symbol, index) => (
-          <DraggableIcon key={index} icon={symbol.icon} name={symbol.name} isLocked={isLocked} />
-        ))}
+      <div className="flex-1 overflow-y-auto p-2 md:p-3">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+          {filteredSymbols.map((symbol, index) => (
+            <DraggableIcon key={index} icon={symbol.icon} name={symbol.name} isLocked={isLocked} />
+          ))}
+        </div>
       </div>
 
       {filteredSymbols.length === 0 && (
-        <div className="text-center py-12 text-gray-500">
-          <p className="text-lg font-medium">Keine Symbole gefunden</p>
-          <p className="text-sm">Versuchen Sie einen anderen Suchbegriff</p>
+        <div className="flex-1 flex items-center justify-center text-gray-500">
+          <div className="text-center">
+            <p className="text-base font-medium">Keine Symbole gefunden</p>
+            <p className="text-xs mt-1">Anderen Suchbegriff versuchen</p>
+          </div>
         </div>
       )}
 
-      <div className="p-5 bg-white border-t border-slate-300 mt-4 sticky bottom-0">
-        <h3 className="text-sm font-bold text-slate-800 mb-3">Tastenkürzel</h3>
-        <div className="space-y-2 text-sm text-slate-700">
-          <p><kbd className="px-3 py-1 bg-slate-200 rounded font-mono">Strg+S</kbd> Speichern</p>
-          <p><kbd className="px-3 py-1 bg-slate-200 rounded font-mono">Strg+O</kbd> Laden</p>
-          <p><kbd className="px-3 py-1 bg-slate-200 rounded font-mono">F11</kbd> Vollbild</p>
-          <p><kbd className="px-3 py-1 bg-slate-200 rounded font-mono">Entf</kbd> Löschen</p>
-        </div>
-        <div className="mt-4 pt-4 border-t border-slate-200">
-          <p className="text-xs text-slate-600">
-            <strong>{symbols.length}</strong> Symbole verfügbar
-          </p>
+      <div className="p-3 bg-white border-t border-slate-300 flex-shrink-0">
+        <div className="text-xs text-slate-600 text-center">
+          <strong>{symbols.length}</strong> Symbole verfügbar
         </div>
       </div>
     </div>

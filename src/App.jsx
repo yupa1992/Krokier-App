@@ -193,8 +193,8 @@ function App() {
           logo={logo}
         />
         
-        <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
-          <div className="flex-1 relative order-1 lg:order-1">
+        <div className="flex flex-row flex-1 overflow-hidden">
+          <div className="flex-1 relative">
             <MapComponent
               ref={mapRef}
               symbols={symbols}
@@ -214,7 +214,7 @@ function App() {
             />
           </div>
           
-          <div className="h-64 lg:h-auto lg:w-96 order-2 lg:order-2 overflow-y-auto">
+          <div className="w-80 md:w-96 overflow-y-auto">
             <Sidebar isLocked={isMapLocked} />
           </div>
         </div>
