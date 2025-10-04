@@ -3,11 +3,15 @@ FROM node:18-alpine as build
 
 WORKDIR /app
 
+# Install build dependencies for native modules
+RUN apk add --no-cache python3 make g++ git
+
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install --legacy-peer-deps
+# Clean install with verbose logging
+RUN npm install --legacy-peer-deps --verbose || \
+    (echo "npm install failed, trying with --force" && npm install --force)
 
 # Copy source code
 COPY . .
