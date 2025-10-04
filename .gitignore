@@ -31,3 +31,12 @@ _archive
 
 # Local Netlify folder
 .netlify
+
+# Environment variables (WICHTIG: Niemals committen!)
+.env
+.env.local
+.env.production
+
+# Database files
+server/data.json
+server/symbols.json

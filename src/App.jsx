@@ -6,7 +6,7 @@ import { MouseTransition, TouchTransition, MultiBackend } from 'react-dnd-multi-
 import MapComponent from './components/MapComponent'
 import Toolbar from './components/Toolbar'
 import Sidebar from './components/Sidebar'
-import AdminPanelOffline from './components/AdminPanelOffline'
+import AdminPanelPro from './components/AdminPanelPro'
 
 // Multi-Backend Konfiguration für Touch und Mouse
 const HTML5toTouch = {
@@ -258,7 +258,7 @@ function App() {
         </div>
 
         {showAdmin && (
-          <AdminPanelOffline
+          <AdminPanelPro
             onClose={() => setShowAdmin(false)}
             logo={logo}
             onLogoChange={setLogo}
