@@ -36,12 +36,12 @@ const Sidebar = ({ isLocked }) => {
     if (savedSymbols) {
       setSymbols(JSON.parse(savedSymbols))
     } else {
-      // Generiere alle PNG-Symbole aus dem Kroki_Symbole Ordner
+      // Generiere alle PNG-Symbole aus dem assets/icons Ordner
       const defaultSymbols = []
       for (let i = 1; i <= 147; i++) {
         defaultSymbols.push({
           id: i,
-          icon: `/Kroki_Symbole/2x/Element ${i}@2x.png`,
+          icon: `/assets/icons/Element ${i}@2x.png`,
           name: `Element ${i}`
         })
       }

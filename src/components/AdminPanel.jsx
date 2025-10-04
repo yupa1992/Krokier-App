@@ -31,7 +31,7 @@ const AdminPanel = ({ onClose, logo, onLogoChange }) => {
     return localStorage.getItem('adminPassword') || 'admin123'
   })
 
-  // Symbole aus Kroki_Symbole laden
+  // Symbole aus assets/icons laden
   useEffect(() => {
     // Versuche gespeicherte Symbole zu laden
     const savedSymbols = localStorage.getItem('symbols')
@@ -43,7 +43,7 @@ const AdminPanel = ({ onClose, logo, onLogoChange }) => {
         loadedSymbols.push({
           id: i,
           name: `Element ${i}`,
-          icon: `/Kroki_Symbole/2x/Element ${i}@2x.png`
+          icon: `/assets/icons/Element ${i}@2x.png`
         })
       }
       setSymbols(loadedSymbols)
