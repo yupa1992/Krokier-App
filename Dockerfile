@@ -3,14 +3,14 @@ FROM node:18 as build
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
-
-# Install dependencies
-RUN npm install --legacy-peer-deps
-
-# Copy source code
+# Copy all files first
 COPY . .
+
+# Clean any existing node_modules and package-lock
+RUN rm -rf node_modules package-lock.json
+
+# Install dependencies with force flag
+RUN npm install --force
 
 # Build the app
 RUN npm run build
