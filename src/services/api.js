@@ -35,6 +35,10 @@ class ApiService {
       return await response.json()
     } catch (error) {
       console.error('API Error:', error)
+      // Bessere Fehlermeldung bei Netzwerkproblemen
+      if (error.message === 'Failed to fetch' || error.name === 'TypeError') {
+        throw new Error('Failed to fetch')
+      }
       throw error
     }
   }

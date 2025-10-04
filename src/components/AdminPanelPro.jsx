@@ -235,11 +235,16 @@ const AdminPanelPro = ({ onClose, logo, onLogoChange }) => {
             >
               {loading ? 'Anmeldung...' : 'Anmelden'}
             </button>
-
-            <p className="text-xs text-gray-500 text-center mt-4">
-              Standard: admin / admin123
-            </p>
           </form>
+
+          {loginError === 'Failed to fetch' && (
+            <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <p className="text-sm font-semibold text-yellow-800 mb-1">⚠️ Backend nicht erreichbar</p>
+              <p className="text-xs text-yellow-700">
+                Starte das Backend mit: <code className="bg-yellow-100 px-2 py-1 rounded">npm run server</code>
+              </p>
+            </div>
+          )}
         </div>
       </div>
     )
