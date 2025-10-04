@@ -22,19 +22,21 @@ const DraggableIcon = ({ icon, name, isLocked }) => {
   return (
     <div
       ref={drag}
-      className={`draggable-symbol bg-white p-2 rounded-lg shadow-md hover:shadow-xl active:shadow-2xl transition-all border-2 border-transparent hover:border-blue-400 active:border-blue-500 ${
+      className={`draggable-symbol bg-white p-3 rounded-lg shadow-md hover:shadow-xl active:shadow-2xl transition-all border-2 border-transparent hover:border-blue-400 active:border-blue-500 flex flex-col items-center ${
         isDragging ? 'opacity-50' : 'opacity-100'
       } ${isLocked ? 'cursor-not-allowed opacity-50' : 'cursor-move touch-none select-none'}`}
       title={name}
-      style={{ touchAction: 'none' }}
+      style={{ touchAction: 'none', minHeight: '140px' }}
     >
-      <img 
-        src={icon} 
-        alt={name} 
-        className="w-16 h-16 object-contain mx-auto pointer-events-none" 
-        draggable={false}
-      />
-      <p className="text-xs text-center mt-1 text-gray-700 font-medium truncate pointer-events-none">{name}</p>
+      <div className="w-20 h-20 flex items-center justify-center mb-2 flex-shrink-0">
+        <img 
+          src={icon} 
+          alt={name} 
+          className="max-w-full max-h-full object-contain pointer-events-none" 
+          draggable={false}
+        />
+      </div>
+      <p className="text-xs text-center text-gray-700 font-medium line-clamp-2 pointer-events-none">{name}</p>
     </div>
   )
 }
@@ -117,8 +119,8 @@ const Sidebar = ({ isLocked }) => {
             </button>
             
             {expandedCategories[category.category] && (
-              <div className="p-2 bg-white">
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+              <div className="p-3 bg-white">
+                <div className="grid grid-cols-3 gap-3">
                   {category.symbols.map((symbol) => (
                     <DraggableIcon 
                       key={symbol.id} 
