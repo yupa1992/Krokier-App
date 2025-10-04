@@ -37,6 +37,9 @@ _archive
 .env.local
 .env.production
 create-env.ps1
+sync-symbols.ps1
+renamed-symbols.js
+export-symbols.js
 
 # Database files
 server/data.json
