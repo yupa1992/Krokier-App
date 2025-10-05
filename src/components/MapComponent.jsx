@@ -5,7 +5,8 @@ import L from 'leaflet'
 import '@geoman-io/leaflet-geoman-free'
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css'
 // Export wird jetzt mit html2canvas gemacht
-import { X, Edit2, Check, Upload } from 'lucide-react'
+import { X, Edit2, Check, Upload, Minus as MinusIcon, Plus as PlusIcon, Square, Circle, Pentagon, Slash, Move, Trash2 } from 'lucide-react'
+import { renderToString } from 'react-dom/server'
 
 // Fix for default marker icons in Leaflet
 delete L.Icon.Default.prototype._getIconUrl
@@ -79,15 +80,15 @@ const DrawControl = () => {
         
         let currentColor = '#EF4444'
         
-        // Zeichnen-Tools - EINFACHE Text-Icons die funktionieren!
+        // Zeichnen-Tools mit Lucide Icons (funktionieren garantiert!)
         const tools = [
-          { icon: '/', title: 'Linie zeichnen (mit Meter)', action: 'Line' },
-          { icon: '□', title: 'Rechteck', action: 'Rectangle' },
-          { icon: '⬡', title: 'Polygon', action: 'Polygon' },
-          { icon: '○', title: 'Kreis', action: 'Circle' },
-          { icon: '✎', title: 'Bearbeiten', action: 'Edit' },
-          { icon: '⇄', title: 'Verschieben', action: 'Drag' },
-          { icon: '✕', title: 'Löschen', action: 'Remove' }
+          { icon: renderToString(<Slash size={20} />), title: 'Linie zeichnen (mit Meter)', action: 'Line' },
+          { icon: renderToString(<Square size={20} />), title: 'Rechteck', action: 'Rectangle' },
+          { icon: renderToString(<Pentagon size={20} />), title: 'Polygon', action: 'Polygon' },
+          { icon: renderToString(<Circle size={20} />), title: 'Kreis', action: 'Circle' },
+          { icon: renderToString(<Edit2 size={20} />), title: 'Bearbeiten', action: 'Edit' },
+          { icon: renderToString(<Move size={20} />), title: 'Verschieben', action: 'Drag' },
+          { icon: renderToString(<Trash2 size={20} />), title: 'Löschen', action: 'Remove' }
         ]
         
         tools.forEach(tool => {
@@ -208,9 +209,9 @@ const DrawControl = () => {
         const divider2 = L.DomUtil.create('div', '', container)
         divider2.style.cssText = 'height: 1px; background: #e5e7eb; margin: 4px 0;'
         
-        // Zoom Buttons
+        // Zoom Buttons mit Lucide Icons
         const zoomIn = L.DomUtil.create('button', 'zoom-btn', container)
-        zoomIn.innerHTML = '+'
+        zoomIn.innerHTML = renderToString(<PlusIcon size={20} />)
         zoomIn.title = 'Hineinzoomen'
         zoomIn.style.cssText = `
           width: 44px;
@@ -219,8 +220,9 @@ const DrawControl = () => {
           border-radius: 8px;
           background: white;
           cursor: pointer;
-          font-size: 24px;
-          font-weight: bold;
+          display: flex;
+          align-items: center;
+          justify-content: center;
           transition: all 0.2s;
         `
         L.DomEvent.on(zoomIn, 'click', function(e) {
@@ -235,7 +237,7 @@ const DrawControl = () => {
         })
         
         const zoomOut = L.DomUtil.create('button', 'zoom-btn', container)
-        zoomOut.innerHTML = '−'
+        zoomOut.innerHTML = renderToString(<MinusIcon size={20} />)
         zoomOut.title = 'Herauszoomen'
         zoomOut.style.cssText = `
           width: 44px;
@@ -244,8 +246,9 @@ const DrawControl = () => {
           border-radius: 8px;
           background: white;
           cursor: pointer;
-          font-size: 24px;
-          font-weight: bold;
+          display: flex;
+          align-items: center;
+          justify-content: center;
           transition: all 0.2s;
         `
         L.DomEvent.on(zoomOut, 'click', function(e) {
