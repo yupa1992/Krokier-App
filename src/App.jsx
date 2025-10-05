@@ -101,26 +101,28 @@ function App() {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords
-          console.log('Initiale Position:', latitude, longitude)
+          console.log('✅ Initiale Position:', latitude, longitude)
           setUserLocation({ lat: latitude, lng: longitude })
         },
         (error) => {
-          console.error('Geolocation-Fehler:', error.message)
+          // Fehler stumm - nicht kritisch
+          console.warn('⚠️ Geolocation nicht verfügbar:', error.code)
         },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        { enableHighAccuracy: false, timeout: 30000, maximumAge: 60000 }
       )
 
       // Dann kontinuierlich überwachen
       watchId = navigator.geolocation.watchPosition(
         (position) => {
           const { latitude, longitude } = position.coords
-          console.log('Position Update:', latitude, longitude)
+          console.log('📍 Position Update:', latitude, longitude)
           setUserLocation({ lat: latitude, lng: longitude })
         },
         (error) => {
-          console.error('Geolocation-Watch-Fehler:', error.message)
+          // Fehler stumm - nicht kritisch
+          console.warn('⚠️ Geolocation-Watch:', error.code)
         },
-        { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
+        { enableHighAccuracy: false, maximumAge: 60000, timeout: 30000 }
       )
     }
 

@@ -37,8 +37,11 @@ const Toolbar = ({ onNewDrawing, onLoad, onToggleFullscreen, isFullscreen, mapRe
     try {
       console.log('🖼️ Starte PNG Export mit leaflet-simple-map-screenshoter...')
       
+      // Warte kurz bis Karte sicher geladen ist
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
       if (!mapRef || !mapRef.current) {
-        throw new Error('Karte nicht gefunden. Bitte warten Sie bis die Karte geladen ist.')
+        throw new Error('Karte nicht gefunden. Bitte warten Sie 2 Sekunden und versuchen Sie es erneut.')
       }
       
       const map = mapRef.current
