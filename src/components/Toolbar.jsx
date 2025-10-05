@@ -159,15 +159,6 @@ const Toolbar = ({ onNewDrawing, onLoad, onToggleFullscreen, isFullscreen, mapRe
               <span>Neue Zeichnung</span>
             </button>
 
-            <button
-              onClick={onLoad}
-              className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg transition-colors font-semibold shadow-md"
-              title="Laden"
-            >
-              <Upload className="w-5 h-5" />
-              <span>Laden</span>
-            </button>
-
             {/* Export Button mit Dropdown */}
             <div className="relative">
               <button
@@ -286,14 +277,6 @@ const Toolbar = ({ onNewDrawing, onLoad, onToggleFullscreen, isFullscreen, mapRe
               >
                 <MapPin className="w-4 h-4" />
                 <span>Standort</span>
-              </button>
-
-              <button
-                onClick={() => { onLoad(); setShowMobileMenu(false); }}
-                className="flex items-center justify-center space-x-2 bg-green-600 px-3 py-2 rounded-lg text-sm"
-              >
-                <Upload className="w-4 h-4" />
-                <span>Laden</span>
               </button>
 
               <button

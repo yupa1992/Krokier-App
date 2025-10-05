@@ -277,69 +277,96 @@ const DrawControl = () => {
         L.DomEvent.on(locateBtn, 'click', function(e) {
           L.DomEvent.stopPropagation(e)
           
+          // Prüfe ob Geolocation verfügbar ist
+          if (!navigator.geolocation) {
+            alert('⚠️ Geolocation wird von Ihrem Browser nicht unterstützt!')
+            return
+          }
+          
           // Zeige Loading
           locateBtn.style.background = '#3B82F6'
           locateBtn.style.borderColor = '#2563EB'
           
-          map.locate({
-            setView: true,
-            maxZoom: 16,
-            enableHighAccuracy: true,
-            timeout: 10000
-          })
-        })
-        
-        // Geolocation Success
-        map.on('locationfound', function(e) {
-          const radius = e.accuracy / 2
-          
-          // Entferne alte Marker
-          if (locationMarker) map.removeLayer(locationMarker)
-          if (locationCircle) map.removeLayer(locationCircle)
-          
-          // Neuer Marker
-          locationMarker = L.marker(e.latlng, {
-            icon: L.divIcon({
-              className: 'location-marker',
-              html: '<div style="width: 20px; height: 20px; background: #3B82F6; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(59,130,246,0.5);"></div>',
-              iconSize: [20, 20],
-              iconAnchor: [10, 10]
-            })
-          }).addTo(map)
-          
-          // Genauigkeits-Kreis
-          locationCircle = L.circle(e.latlng, {
-            radius: radius,
-            color: '#3B82F6',
-            fillColor: '#3B82F6',
-            fillOpacity: 0.15,
-            weight: 2
-          }).addTo(map)
-          
-          // Button zurücksetzen
-          locateBtn.style.background = '#10B981'
-          locateBtn.style.borderColor = '#059669'
-          
-          setTimeout(() => {
-            locateBtn.style.background = 'white'
-            locateBtn.style.borderColor = '#e5e7eb'
-          }, 2000)
-        })
-        
-        // Geolocation Error
-        map.on('locationerror', function(e) {
-          console.error('Geolocation Error:', e.message)
-          
-          // Button rot färben
-          locateBtn.style.background = '#EF4444'
-          locateBtn.style.borderColor = '#DC2626'
-          
-          setTimeout(() => {
-            locateBtn.style.background = 'white'
-            locateBtn.style.borderColor = '#e5e7eb'
-          }, 2000)
-          
-          alert('⚠️ Standort konnte nicht ermittelt werden!\n\nBitte erlauben Sie den Standortzugriff in Ihrem Browser.')
+          // Verwende Browser Geolocation API direkt
+          navigator.geolocation.getCurrentPosition(
+            function(position) {
+              const lat = position.coords.latitude
+              const lng = position.coords.longitude
+              const accuracy = position.coords.accuracy
+              
+              // Entferne alte Marker
+              if (locationMarker) map.removeLayer(locationMarker)
+              if (locationCircle) map.removeLayer(locationCircle)
+              
+              // Neuer Marker
+              locationMarker = L.marker([lat, lng], {
+                icon: L.divIcon({
+                  className: 'location-marker',
+                  html: '<div style="width: 20px; height: 20px; background: #3B82F6; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(59,130,246,0.5);"></div>',
+                  iconSize: [20, 20],
+                  iconAnchor: [10, 10]
+                })
+              }).addTo(map)
+              
+              // Genauigkeits-Kreis
+              locationCircle = L.circle([lat, lng], {
+                radius: accuracy,
+                color: '#3B82F6',
+                fillColor: '#3B82F6',
+                fillOpacity: 0.15,
+                weight: 2
+              }).addTo(map)
+              
+              // Zoom zur Position
+              map.setView([lat, lng], 16)
+              
+              // Button grün
+              locateBtn.style.background = '#10B981'
+              locateBtn.style.borderColor = '#059669'
+              
+              setTimeout(() => {
+                locateBtn.style.background = 'white'
+                locateBtn.style.borderColor = '#e5e7eb'
+              }, 2000)
+              
+              console.log('✅ Position gefunden:', lat, lng, 'Genauigkeit:', accuracy, 'm')
+            },
+            function(error) {
+              console.error('❌ Geolocation Error:', error)
+              
+              // Button rot
+              locateBtn.style.background = '#EF4444'
+              locateBtn.style.borderColor = '#DC2626'
+              
+              setTimeout(() => {
+                locateBtn.style.background = 'white'
+                locateBtn.style.borderColor = '#e5e7eb'
+              }, 2000)
+              
+              let errorMsg = '⚠️ Standort konnte nicht ermittelt werden!\n\n'
+              
+              switch(error.code) {
+                case error.PERMISSION_DENIED:
+                  errorMsg += 'Sie haben den Standortzugriff verweigert.\n\nBitte erlauben Sie den Standortzugriff in Ihren Browser-Einstellungen.'
+                  break
+                case error.POSITION_UNAVAILABLE:
+                  errorMsg += 'Standortinformationen sind nicht verfügbar.'
+                  break
+                case error.TIMEOUT:
+                  errorMsg += 'Die Anfrage ist abgelaufen. Bitte versuchen Sie es erneut.'
+                  break
+                default:
+                  errorMsg += 'Ein unbekannter Fehler ist aufgetreten.'
+              }
+              
+              alert(errorMsg)
+            },
+            {
+              enableHighAccuracy: true,
+              timeout: 10000,
+              maximumAge: 0
+            }
+          )
         })
         
         L.DomEvent.on(locateBtn, 'mouseenter', function() {
