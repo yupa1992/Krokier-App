@@ -34,75 +34,37 @@ const Toolbar = ({ onNewDrawing, onLoad, onToggleFullscreen, isFullscreen, mapRe
   const handleExportPNG = async () => {
     setShowExportMenu(false)
     
+    if (!window.mapScreenshoter) {
+      alert('❌ Export nicht verfügbar!\n\nBitte warten Sie 5 Sekunden bis die Karte vollständig geladen ist und versuchen Sie es erneut.')
+      return
+    }
+    
     try {
-      console.log('🖼️ Starte PNG Export mit leaflet-simple-map-screenshoter...')
-      
-      // Warte kurz bis Karte sicher geladen ist
-      await new Promise(resolve => setTimeout(resolve, 500))
-      
-      if (!mapRef || !mapRef.current) {
-        throw new Error('Karte nicht gefunden. Bitte warten Sie 2 Sekunden und versuchen Sie es erneut.')
-      }
-      
-      const map = mapRef.current
-      
-      // Prüfe ob SimpleMapScreenshoter verfügbar ist
-      if (!window.mapScreenshoter) {
-        console.warn('⚠️ SimpleMapScreenshoter nicht initialisiert, warte 2 Sekunden...')
-        await new Promise(resolve => setTimeout(resolve, 2000))
-        
-        if (!window.mapScreenshoter) {
-          throw new Error('Export-Bibliothek nicht geladen. Bitte laden Sie die Seite neu.')
-        }
-      }
-      
-      console.log('✅ SimpleMapScreenshoter gefunden, starte Export...')
-      
       const now = new Date()
       const datum = formatDate(now)
       const zeit = formatTime(now)
-      const ort = einsatzort || 'Einsatzort nicht angegeben'
+      const ort = einsatzort || 'Krokier Karte'
       
-      const options = {
-        mimeType: 'image/png',
+      const blob = await window.mapScreenshoter.takeScreen('png', {
         caption: `${ort} | ${datum} ${zeit}`,
         captionFontSize: 18,
-        captionFont: 'bold Arial, sans-serif',
+        captionFont: 'bold Arial',
         captionColor: '#FFFFFF',
         captionBgColor: 'rgba(0, 0, 0, 0.8)',
-        captionOffset: 15,
-        hideElementsWithSelectors: [
-          '.leaflet-control-container',
-          '.leaflet-top',
-          '.leaflet-bottom'
-        ]
-      }
+        captionOffset: 15
+      })
       
-      const blob = await window.mapScreenshoter.takeScreen('png', options)
-      
-      // Download
       const link = document.createElement('a')
-      const date = new Date().toISOString().split('T')[0]
-      const time = new Date().toTimeString().split(' ')[0].replace(/:/g, '-')
-      const filename = einsatzort ? 
-        `${einsatzort.replace(/[^a-zA-Z0-9]/g, '_')}-${date}-${time}.png` : 
-        `Krokier_Karte-${date}-${time}.png`
-      
+      const filename = `${ort.replace(/[^a-zA-Z0-9]/g, '_')}-${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.png`
       link.download = filename
       link.href = URL.createObjectURL(blob)
-      document.body.appendChild(link)
       link.click()
-      document.body.removeChild(link)
-      
-      // Cleanup
       setTimeout(() => URL.revokeObjectURL(link.href), 100)
       
-      console.log(`✅ PNG Export erfolgreich: ${filename}`)
-      alert(`✅ Karte erfolgreich exportiert!\n\nDatei: ${filename}`)
+      alert(`✅ Exportiert: ${filename}`)
       
     } catch (error) {
-      console.error('❌ PNG Export Fehler:', error)
-      alert(`❌ Export fehlgeschlagen!\n\nFehler: ${error.message}\n\nLösungen:\n• Warten Sie bis die Karte vollständig geladen ist\n• Laden Sie die Seite neu (F5)\n• Überprüfen Sie Ihre Internetverbindung`)
+      alert(`❌ Export fehlgeschlagen: ${error.message}`)
     }
   }
 
