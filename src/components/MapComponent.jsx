@@ -69,12 +69,12 @@ const DrawControl = () => {
         const container = L.DomUtil.create('div', 'unified-toolbar')
         container.style.cssText = `
           background: white;
-          padding: 12px;
+          padding: 8px;
           border-radius: 12px;
           box-shadow: 0 4px 12px rgba(0,0,0,0.15);
           display: flex;
           flex-direction: column;
-          gap: 12px;
+          gap: 8px;
           min-width: 60px;
         `
         
@@ -96,13 +96,13 @@ const DrawControl = () => {
           btn.innerHTML = tool.icon
           btn.title = tool.title
           btn.style.cssText = `
-            width: 44px;
-            height: 44px;
+            width: 40px;
+            height: 40px;
             border: 2px solid #e5e7eb;
             border-radius: 8px;
             background: white;
             cursor: pointer;
-            font-size: 20px;
+            font-size: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -181,8 +181,8 @@ const DrawControl = () => {
         colors.forEach((color, index) => {
           const colorBtn = L.DomUtil.create('button', 'color-btn', container)
           colorBtn.style.cssText = `
-            width: 44px;
-            height: 44px;
+            width: 40px;
+            height: 40px;
             border: ${index === 0 ? '3px' : '2px'} solid ${index === 0 ? '#000' : '#e5e7eb'};
             border-radius: 8px;
             background: ${color};
@@ -218,11 +218,11 @@ const DrawControl = () => {
         
         // Zoom Buttons mit Lucide Icons
         const zoomIn = L.DomUtil.create('button', 'zoom-btn', container)
-        zoomIn.innerHTML = renderToString(<PlusIcon size={20} />)
+        zoomIn.innerHTML = renderToString(<PlusIcon size={18} />)
         zoomIn.title = 'Hineinzoomen'
         zoomIn.style.cssText = `
-          width: 44px;
-          height: 44px;
+          width: 40px;
+          height: 40px;
           border: 2px solid #e5e7eb;
           border-radius: 8px;
           background: white;
@@ -244,11 +244,11 @@ const DrawControl = () => {
         })
         
         const zoomOut = L.DomUtil.create('button', 'zoom-btn', container)
-        zoomOut.innerHTML = renderToString(<MinusIcon size={20} />)
+        zoomOut.innerHTML = renderToString(<MinusIcon size={18} />)
         zoomOut.title = 'Herauszoomen'
         zoomOut.style.cssText = `
-          width: 44px;
-          height: 44px;
+          width: 40px;
+          height: 40px;
           border: 2px solid #e5e7eb;
           border-radius: 8px;
           background: white;

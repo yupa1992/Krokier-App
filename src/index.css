@@ -203,7 +203,7 @@ body {
 /* ✅ NEUE EINHEITLICHE TOOLBAR - UNTER HEADER! */
 .unified-toolbar {
   background: white !important;
-  padding: 12px !important;
+  padding: 8px !important;
   border-radius: 12px !important;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
   pointer-events: auto !important;
@@ -212,6 +212,16 @@ body {
   margin-bottom: 20px !important;
   max-height: calc(100vh - 120px) !important;
   overflow-y: auto !important;
+}
+
+/* Scrollbar für Toolbar */
+.unified-toolbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.unified-toolbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
 }
 
 /* Leaflet topleft Container auch nach unten */
