@@ -68,17 +68,17 @@ const DrawControl = () => {
     if (initRef.current) return
     initRef.current = true
 
-    // Geoman Toolbar mit METER-ANZEIGE & Canvas-Renderer
+    // ✨ NEUE PROFESSIONELLE TOOLBAR ✨
+    // Geoman OHNE Standard-Toolbar (wir bauen eigene!)
     map.pm.addControls({
       position: 'topleft',
-      drawCircle: true,
-      drawPolyline: true,
-      drawRectangle: true,
-      drawPolygon: true,
-      editMode: true,
-      dragMode: true,
-      removalMode: true,
-      // ALLES ANDERE DEAKTIVIERT
+      drawCircle: false,
+      drawPolyline: false,
+      drawRectangle: false,
+      drawPolygon: false,
+      editMode: false,
+      dragMode: false,
+      removalMode: false,
       drawCircleMarker: false,
       drawMarker: false,
       drawText: false,
@@ -100,50 +100,136 @@ const DrawControl = () => {
         fillOpacity: 0.4,
         weight: 3,
       },
-      // Canvas-Renderer für bessere Performance
       preferCanvas: true
     })
 
-    // Farb-Toolbar erstellen
-    const ColorControl = L.Control.extend({
+    // 🎨 NEUE EINHEITLICHE TOOLBAR
+    const UnifiedToolbar = L.Control.extend({
       onAdd: function() {
-        const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control')
-        container.style.background = 'white'
-        container.style.padding = '8px'
-        container.style.borderRadius = '4px'
-        container.innerHTML = `
-          <div style="display: flex; flex-direction: column; gap: 6px;">
-            <p style="font-size: 11px; font-weight: bold; margin: 0 0 4px 0; text-align: center;">Farbe</p>
-            <button class="color-btn" data-color="#EF4444" style="width: 30px; height: 30px; background: #EF4444; border: 3px solid #000; border-radius: 4px; cursor: pointer;"></button>
-            <button class="color-btn" data-color="#000000" style="width: 30px; height: 30px; background: #000000; border: 2px solid #ccc; border-radius: 4px; cursor: pointer;"></button>
-            <button class="color-btn" data-color="#3B82F6" style="width: 30px; height: 30px; background: #3B82F6; border: 2px solid #ccc; border-radius: 4px; cursor: pointer;"></button>
-            <button class="color-btn" data-color="#10B981" style="width: 30px; height: 30px; background: #10B981; border: 2px solid #ccc; border-radius: 4px; cursor: pointer;"></button>
-            <button class="color-btn" data-color="#F59E0B" style="width: 30px; height: 30px; background: #F59E0B; border: 2px solid #ccc; border-radius: 4px; cursor: pointer;"></button>
-            <button class="color-btn" data-color="#8B5CF6" style="width: 30px; height: 30px; background: #8B5CF6; border: 2px solid #ccc; border-radius: 4px; cursor: pointer;"></button>
-          </div>
+        const container = L.DomUtil.create('div', 'unified-toolbar')
+        container.style.cssText = `
+          background: white;
+          padding: 12px;
+          border-radius: 12px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          min-width: 60px;
         `
         
-        // Event Listener für Farb-Buttons
-        container.querySelectorAll('.color-btn').forEach(btn => {
+        let currentColor = '#EF4444'
+        
+        // Zeichnen-Tools
+        const tools = [
+          { icon: '✏️', title: 'Linie', action: 'Line' },
+          { icon: '▭', title: 'Rechteck', action: 'Rectangle' },
+          { icon: '⬟', title: 'Polygon', action: 'Polygon' },
+          { icon: '⭕', title: 'Kreis', action: 'Circle' },
+          { icon: '✎', title: 'Bearbeiten', action: 'Edit' },
+          { icon: '↔', title: 'Verschieben', action: 'Drag' },
+          { icon: '🗑️', title: 'Löschen', action: 'Remove' }
+        ]
+        
+        tools.forEach(tool => {
+          const btn = L.DomUtil.create('button', 'tool-btn', container)
+          btn.innerHTML = tool.icon
+          btn.title = tool.title
+          btn.style.cssText = `
+            width: 44px;
+            height: 44px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+          `
+          
           L.DomEvent.on(btn, 'click', function(e) {
             L.DomEvent.stopPropagation(e)
-            const color = this.getAttribute('data-color')
             
             // Alle Buttons zurücksetzen
-            container.querySelectorAll('.color-btn').forEach(b => {
-              b.style.border = '2px solid #ccc'
+            container.querySelectorAll('.tool-btn').forEach(b => {
+              b.style.background = 'white'
+              b.style.borderColor = '#e5e7eb'
             })
-            // Ausgewählten Button markieren
-            this.style.border = '3px solid #000'
             
-            // Farbe für neue Shapes setzen
+            // Aktiven Button markieren
+            btn.style.background = '#3B82F6'
+            btn.style.borderColor = '#2563EB'
+            
+            // Tool aktivieren
+            if (tool.action === 'Edit') {
+              map.pm.toggleGlobalEditMode()
+            } else if (tool.action === 'Drag') {
+              map.pm.toggleGlobalDragMode()
+            } else if (tool.action === 'Remove') {
+              map.pm.toggleGlobalRemovalMode()
+            } else {
+              map.pm.enableDraw(tool.action, {
+                pathOptions: {
+                  color: currentColor,
+                  fillColor: currentColor,
+                  fillOpacity: 0.4,
+                  weight: 3
+                }
+              })
+            }
+          })
+          
+          L.DomEvent.on(btn, 'mouseenter', function() {
+            if (btn.style.background !== 'rgb(59, 130, 246)') {
+              btn.style.background = '#f3f4f6'
+            }
+          })
+          
+          L.DomEvent.on(btn, 'mouseleave', function() {
+            if (btn.style.background !== 'rgb(59, 130, 246)') {
+              btn.style.background = 'white'
+            }
+          })
+        })
+        
+        // Trennlinie
+        const divider = L.DomUtil.create('div', '', container)
+        divider.style.cssText = 'height: 1px; background: #e5e7eb; margin: 4px 0;'
+        
+        // Farben
+        const colors = ['#EF4444', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#000000']
+        colors.forEach((color, index) => {
+          const colorBtn = L.DomUtil.create('button', 'color-btn', container)
+          colorBtn.style.cssText = `
+            width: 44px;
+            height: 44px;
+            border: ${index === 0 ? '3px' : '2px'} solid ${index === 0 ? '#000' : '#e5e7eb'};
+            border-radius: 8px;
+            background: ${color};
+            cursor: pointer;
+            transition: all 0.2s;
+          `
+          
+          L.DomEvent.on(colorBtn, 'click', function(e) {
+            L.DomEvent.stopPropagation(e)
+            currentColor = color
+            
+            // Alle Farb-Buttons zurücksetzen
+            container.querySelectorAll('.color-btn').forEach(b => {
+              b.style.border = '2px solid #e5e7eb'
+            })
+            colorBtn.style.border = '3px solid #000'
+            
+            // Farbe aktualisieren
             map.pm.setGlobalOptions({
               pathOptions: {
                 color: color,
                 fillColor: color,
                 fillOpacity: 0.4,
-                weight: 3,
-              },
+                weight: 3
+              }
             })
           })
         })
@@ -152,23 +238,26 @@ const DrawControl = () => {
       }
     })
 
-    const colorControl = new ColorControl({ position: 'topleft' })
-    map.addControl(colorControl)
+    const toolbar = new UnifiedToolbar({ position: 'topleft' })
+    map.addControl(toolbar)
 
-    // Layer Switcher - Verschiedene Kartenansichten
+    // 🗺️ LAYER SWITCHER - Schönes Design
     const LayerControl = L.Control.extend({
       onAdd: function() {
-        const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control')
-        container.style.background = 'white'
-        container.style.padding = '10px'
-        container.style.borderRadius = '8px'
-        container.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)'
+        const container = L.DomUtil.create('div', 'layer-control')
+        container.style.cssText = `
+          background: white;
+          padding: 12px;
+          border-radius: 12px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+          min-width: 150px;
+        `
         container.innerHTML = `
-          <div style="display: flex; flex-direction: column; gap: 8px; min-width: 140px;">
-            <p style="font-size: 12px; font-weight: bold; margin: 0 0 4px 0; text-align: center; color: #334155;">Kartenansicht</p>
-            <button id="layer-street" class="layer-btn active" style="padding: 8px 12px; background: #3B82F6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.2s;">🗺️ Straße</button>
-            <button id="layer-satellite" class="layer-btn" style="padding: 8px 12px; background: #E2E8F0; color: #334155; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.2s;">🛰️ Satellit</button>
-            <button id="layer-topo" class="layer-btn" style="padding: 8px 12px; background: #E2E8F0; color: #334155; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.2s;">⛰️ Topografie</button>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <p style="font-size: 13px; font-weight: 700; margin: 0 0 4px 0; text-align: center; color: #1e293b;">Kartenansicht</p>
+            <button id="layer-street" class="layer-btn active" style="padding: 10px 14px; background: #3B82F6; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; box-shadow: 0 2px 4px rgba(59,130,246,0.3);">🗺️ Straße</button>
+            <button id="layer-satellite" class="layer-btn" style="padding: 10px 14px; background: #f1f5f9; color: #334155; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;">🛰️ Satellit</button>
+            <button id="layer-topo" class="layer-btn" style="padding: 10px 14px; background: #f1f5f9; color: #334155; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;">⛰️ Topografie</button>
           </div>
         `
         
@@ -196,12 +285,14 @@ const DrawControl = () => {
         
         const setActiveButton = (activeBtn) => {
           [streetBtn, satelliteBtn, topoBtn].forEach(btn => {
-            btn.style.background = '#E2E8F0'
+            btn.style.background = '#f1f5f9'
             btn.style.color = '#334155'
+            btn.style.boxShadow = 'none'
             btn.classList.remove('active')
           })
           activeBtn.style.background = '#3B82F6'
           activeBtn.style.color = 'white'
+          activeBtn.style.boxShadow = '0 2px 4px rgba(59,130,246,0.3)'
           activeBtn.classList.add('active')
         }
         

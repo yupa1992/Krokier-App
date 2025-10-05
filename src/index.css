@@ -200,53 +200,41 @@ body {
   background: #555;
 }
 
-/* ✅ GEOMAN TOOLBAR - EINHEITLICHES DESIGN */
-.leaflet-pm-toolbar {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 4px !important;
-  padding: 8px !important;
+/* ✅ NEUE EINHEITLICHE TOOLBAR */
+.unified-toolbar {
   background: white !important;
+  padding: 12px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+}
+
+.unified-toolbar button {
+  width: 44px !important;
+  height: 44px !important;
   border-radius: 8px !important;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
-}
-
-/* Alle Geoman Buttons einheitlich */
-.leaflet-pm-toolbar .leaflet-pm-icon-marker,
-.leaflet-pm-toolbar .leaflet-pm-icon-polyline,
-.leaflet-pm-toolbar .leaflet-pm-icon-rectangle,
-.leaflet-pm-toolbar .leaflet-pm-icon-polygon,
-.leaflet-pm-toolbar .leaflet-pm-icon-circle,
-.leaflet-pm-toolbar .leaflet-pm-icon-cut,
-.leaflet-pm-toolbar .leaflet-pm-icon-edit,
-.leaflet-pm-toolbar .leaflet-pm-icon-drag,
-.leaflet-pm-toolbar .leaflet-pm-icon-delete,
-.leaflet-pm-toolbar a {
-  width: 40px !important;
-  height: 40px !important;
-  border-radius: 6px !important;
-  background: white !important;
-  border: 2px solid #e5e7eb !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
   transition: all 0.2s ease !important;
-  margin: 0 !important;
 }
 
-/* Hover State */
-.leaflet-pm-toolbar a:hover {
-  background: #f3f4f6 !important;
-  border-color: #3B82F6 !important;
+.unified-toolbar button:hover {
   transform: scale(1.05) !important;
 }
 
-/* Active/Selected State */
-.leaflet-pm-toolbar a.active,
-.leaflet-pm-toolbar a.leaflet-pm-action {
-  background: #3B82F6 !important;
-  border-color: #2563EB !important;
-  color: white !important;
+/* Layer Control */
+.layer-control {
+  background: white !important;
+  padding: 12px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+}
+
+.layer-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+}
+
+/* Verstecke alte Geoman-Toolbar komplett */
+.leaflet-pm-toolbar {
+  display: none !important;
 }
 
 /* Zoom Controls einheitlich */
