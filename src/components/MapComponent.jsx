@@ -254,6 +254,106 @@ const DrawControl = () => {
           zoomOutBtn.style.background = 'white'
         })
         
+        // 📍 GEOLOCATION BUTTON
+        const locateBtn = L.DomUtil.create('button', 'locate-btn', container)
+        locateBtn.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="12" r="3" fill="currentColor"/><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/><line x1="12" y1="1" x2="12" y2="4" stroke="currentColor" stroke-width="2"/><line x1="12" y1="20" x2="12" y2="23" stroke="currentColor" stroke-width="2"/><line x1="1" y1="12" x2="4" y2="12" stroke="currentColor" stroke-width="2"/><line x1="20" y1="12" x2="23" y2="12" stroke="currentColor" stroke-width="2"/></svg>'
+        locateBtn.title = 'Meine Position'
+        locateBtn.style.cssText = `
+          width: 36px;
+          height: 36px;
+          border: 2px solid #e5e7eb;
+          border-radius: 6px;
+          background: white;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s;
+        `
+        
+        let locationMarker = null
+        let locationCircle = null
+        
+        L.DomEvent.on(locateBtn, 'click', function(e) {
+          L.DomEvent.stopPropagation(e)
+          
+          // Zeige Loading
+          locateBtn.style.background = '#3B82F6'
+          locateBtn.style.borderColor = '#2563EB'
+          
+          map.locate({
+            setView: true,
+            maxZoom: 16,
+            enableHighAccuracy: true,
+            timeout: 10000
+          })
+        })
+        
+        // Geolocation Success
+        map.on('locationfound', function(e) {
+          const radius = e.accuracy / 2
+          
+          // Entferne alte Marker
+          if (locationMarker) map.removeLayer(locationMarker)
+          if (locationCircle) map.removeLayer(locationCircle)
+          
+          // Neuer Marker
+          locationMarker = L.marker(e.latlng, {
+            icon: L.divIcon({
+              className: 'location-marker',
+              html: '<div style="width: 20px; height: 20px; background: #3B82F6; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(59,130,246,0.5);"></div>',
+              iconSize: [20, 20],
+              iconAnchor: [10, 10]
+            })
+          }).addTo(map)
+          
+          // Genauigkeits-Kreis
+          locationCircle = L.circle(e.latlng, {
+            radius: radius,
+            color: '#3B82F6',
+            fillColor: '#3B82F6',
+            fillOpacity: 0.15,
+            weight: 2
+          }).addTo(map)
+          
+          // Button zurücksetzen
+          locateBtn.style.background = '#10B981'
+          locateBtn.style.borderColor = '#059669'
+          
+          setTimeout(() => {
+            locateBtn.style.background = 'white'
+            locateBtn.style.borderColor = '#e5e7eb'
+          }, 2000)
+        })
+        
+        // Geolocation Error
+        map.on('locationerror', function(e) {
+          console.error('Geolocation Error:', e.message)
+          
+          // Button rot färben
+          locateBtn.style.background = '#EF4444'
+          locateBtn.style.borderColor = '#DC2626'
+          
+          setTimeout(() => {
+            locateBtn.style.background = 'white'
+            locateBtn.style.borderColor = '#e5e7eb'
+          }, 2000)
+          
+          alert('⚠️ Standort konnte nicht ermittelt werden!\n\nBitte erlauben Sie den Standortzugriff in Ihrem Browser.')
+        })
+        
+        L.DomEvent.on(locateBtn, 'mouseenter', function() {
+          if (locateBtn.style.background === 'white' || locateBtn.style.background === '') {
+            locateBtn.style.background = '#f3f4f6'
+          }
+        })
+        
+        L.DomEvent.on(locateBtn, 'mouseleave', function() {
+          if (locateBtn.style.background === 'rgb(243, 244, 246)') {
+            locateBtn.style.background = 'white'
+          }
+        })
+        
         return container
       }
     })
