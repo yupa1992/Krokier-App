@@ -666,6 +666,13 @@ const DropZone = ({ onAddSymbol, onAddImage, isLocked }) => {
     accept: 'SYMBOL',
     drop: (item, monitor) => {
       if (isLocked) return
+      
+      // ✅ ALLE TOOLS AUTOMATISCH DEAKTIVIEREN!
+      map.pm.disableDraw()
+      map.pm.disableGlobalEditMode()
+      map.pm.disableGlobalDragMode()
+      map.pm.disableGlobalRemovalMode()
+      
       const offset = monitor.getClientOffset()
       if (!offset) return
 

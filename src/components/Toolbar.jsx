@@ -6,7 +6,10 @@ import jsPDF from 'jspdf'
 const Toolbar = ({ onNewDrawing, onLoad, onToggleFullscreen, isFullscreen, mapRef, isMapLocked, onToggleLock, onShowAdmin, logo }) => {
   const [currentTime, setCurrentTime] = useState(new Date())
   const [showExportMenu, setShowExportMenu] = useState(false)
-  const [einsatzort, setEinsatzort] = useState('')
+  const [einsatzort, setEinsatzort] = useState(() => {
+    // ✅ Einsatzort aus localStorage laden
+    return localStorage.getItem('einsatzort') || ''
+  })
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -14,6 +17,11 @@ const Toolbar = ({ onNewDrawing, onLoad, onToggleFullscreen, isFullscreen, mapRe
     }, 1000)
     return () => clearInterval(timer)
   }, [])
+  
+  // ✅ Einsatzort in localStorage speichern
+  useEffect(() => {
+    localStorage.setItem('einsatzort', einsatzort)
+  }, [einsatzort])
 
   const formatTime = (date) => {
     return date.toLocaleTimeString('de-DE', {
