@@ -111,32 +111,43 @@ const DrawControl = () => {
           L.DomEvent.on(btn, 'click', function(e) {
             L.DomEvent.stopPropagation(e)
             
+            // Wenn Button bereits aktiv ist, deaktivieren
+            const isActive = btn.style.background === 'rgb(59, 130, 246)'
+            
+            // Alle Tools deaktivieren
+            map.pm.disableDraw()
+            map.pm.disableGlobalEditMode()
+            map.pm.disableGlobalDragMode()
+            map.pm.disableGlobalRemovalMode()
+            
             // Alle Buttons zurücksetzen
             container.querySelectorAll('.tool-btn').forEach(b => {
               b.style.background = 'white'
               b.style.borderColor = '#e5e7eb'
             })
             
-            // Aktiven Button markieren
-            btn.style.background = '#3B82F6'
-            btn.style.borderColor = '#2563EB'
-            
-            // Tool aktivieren
-            if (tool.action === 'Edit') {
-              map.pm.toggleGlobalEditMode()
-            } else if (tool.action === 'Drag') {
-              map.pm.toggleGlobalDragMode()
-            } else if (tool.action === 'Remove') {
-              map.pm.toggleGlobalRemovalMode()
-            } else {
-              map.pm.enableDraw(tool.action, {
-                pathOptions: {
-                  color: currentColor,
-                  fillColor: currentColor,
-                  fillOpacity: 0.4,
-                  weight: 3
-                }
-              })
+            // Wenn nicht aktiv war, aktivieren
+            if (!isActive) {
+              btn.style.background = '#3B82F6'
+              btn.style.borderColor = '#2563EB'
+              
+              // Tool aktivieren
+              if (tool.action === 'Edit') {
+                map.pm.enableGlobalEditMode()
+              } else if (tool.action === 'Drag') {
+                map.pm.enableGlobalDragMode()
+              } else if (tool.action === 'Remove') {
+                map.pm.enableGlobalRemovalMode()
+              } else {
+                map.pm.enableDraw(tool.action, {
+                  pathOptions: {
+                    color: currentColor,
+                    fillColor: currentColor,
+                    fillOpacity: 0.4,
+                    weight: 3
+                  }
+                })
+              }
             }
           })
           
@@ -191,6 +202,61 @@ const DrawControl = () => {
               }
             })
           })
+        })
+        
+        // Trennlinie 2
+        const divider2 = L.DomUtil.create('div', '', container)
+        divider2.style.cssText = 'height: 1px; background: #e5e7eb; margin: 4px 0;'
+        
+        // Zoom Buttons
+        const zoomIn = L.DomUtil.create('button', 'zoom-btn', container)
+        zoomIn.innerHTML = '+'
+        zoomIn.title = 'Hineinzoomen'
+        zoomIn.style.cssText = `
+          width: 44px;
+          height: 44px;
+          border: 2px solid #e5e7eb;
+          border-radius: 8px;
+          background: white;
+          cursor: pointer;
+          font-size: 24px;
+          font-weight: bold;
+          transition: all 0.2s;
+        `
+        L.DomEvent.on(zoomIn, 'click', function(e) {
+          L.DomEvent.stopPropagation(e)
+          map.zoomIn()
+        })
+        L.DomEvent.on(zoomIn, 'mouseenter', function() {
+          zoomIn.style.background = '#f3f4f6'
+        })
+        L.DomEvent.on(zoomIn, 'mouseleave', function() {
+          zoomIn.style.background = 'white'
+        })
+        
+        const zoomOut = L.DomUtil.create('button', 'zoom-btn', container)
+        zoomOut.innerHTML = '−'
+        zoomOut.title = 'Herauszoomen'
+        zoomOut.style.cssText = `
+          width: 44px;
+          height: 44px;
+          border: 2px solid #e5e7eb;
+          border-radius: 8px;
+          background: white;
+          cursor: pointer;
+          font-size: 24px;
+          font-weight: bold;
+          transition: all 0.2s;
+        `
+        L.DomEvent.on(zoomOut, 'click', function(e) {
+          L.DomEvent.stopPropagation(e)
+          map.zoomOut()
+        })
+        L.DomEvent.on(zoomOut, 'mouseenter', function() {
+          zoomOut.style.background = '#f3f4f6'
+        })
+        L.DomEvent.on(zoomOut, 'mouseleave', function() {
+          zoomOut.style.background = 'white'
         })
         
         return container
