@@ -235,6 +235,8 @@ const DrawControl = () => {
     
     // Entferne Tile-Grenzen und Marker-Rahmen vor dem Screenshot
     map.on('simpleMapScreenshoter.takeScreen', () => {
+      console.log('📸 Screenshot wird erstellt, blende unnötige Elemente aus...')
+      
       // Entferne alle Tile-Grenzen
       const tiles = document.querySelectorAll('.leaflet-tile')
       tiles.forEach(tile => {

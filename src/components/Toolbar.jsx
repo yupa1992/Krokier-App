@@ -45,6 +45,11 @@ const Toolbar = ({ onNewDrawing, onLoad, onToggleFullscreen, isFullscreen, mapRe
       const zeit = formatTime(now)
       const ort = einsatzort || 'Krokier Karte'
       
+      // Verstecke Sidebar temporär
+      const sidebar = document.querySelector('.w-80, .w-96')
+      const sidebarDisplay = sidebar ? sidebar.style.display : null
+      if (sidebar) sidebar.style.display = 'none'
+      
       const blob = await window.mapScreenshoter.takeScreen('png', {
         caption: `${ort} | ${datum} ${zeit}`,
         captionFontSize: 18,
@@ -53,6 +58,13 @@ const Toolbar = ({ onNewDrawing, onLoad, onToggleFullscreen, isFullscreen, mapRe
         captionBgColor: 'rgba(0, 0, 0, 0.8)',
         captionOffset: 15
       })
+      
+      // Zeige Sidebar wieder
+      if (sidebar && sidebarDisplay !== null) {
+        sidebar.style.display = sidebarDisplay
+      } else if (sidebar) {
+        sidebar.style.display = ''
+      }
       
       const link = document.createElement('a')
       const filename = `${ort.replace(/[^a-zA-Z0-9]/g, '_')}-${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.png`
@@ -64,6 +76,10 @@ const Toolbar = ({ onNewDrawing, onLoad, onToggleFullscreen, isFullscreen, mapRe
       alert(`✅ Exportiert: ${filename}`)
       
     } catch (error) {
+      // Stelle sicher dass Sidebar wieder da ist
+      const sidebar = document.querySelector('.w-80, .w-96')
+      if (sidebar) sidebar.style.display = ''
+      
       alert(`❌ Export fehlgeschlagen: ${error.message}`)
     }
   }
