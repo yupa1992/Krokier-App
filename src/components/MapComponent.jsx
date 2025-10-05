@@ -5,7 +5,7 @@ import L from 'leaflet'
 import '@geoman-io/leaflet-geoman-free'
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css'
 // Export wird jetzt mit html2canvas gemacht
-import { X, Edit2, Check, Upload, Minus as MinusIcon, Plus as PlusIcon, Square, Circle, Pentagon, Slash, Move, Trash2 } from 'lucide-react'
+import { X, Edit2, Check, Upload, Minus as MinusIcon, Plus as PlusIcon, Square, Circle, Pentagon, TrendingUp, Move, Trash2 } from 'lucide-react'
 import { renderToString } from 'react-dom/server'
 
 // Fix for default marker icons in Leaflet
@@ -82,7 +82,7 @@ const DrawControl = () => {
         
         // Zeichnen-Tools mit Lucide Icons (funktionieren garantiert!)
         const tools = [
-          { icon: renderToString(<Slash size={20} />), title: 'Linie zeichnen (mit Meter)', action: 'Line' },
+          { icon: renderToString(<TrendingUp size={20} />), title: 'Linie zeichnen (mit Meter)', action: 'Line' },
           { icon: renderToString(<Square size={20} />), title: 'Rechteck', action: 'Rectangle' },
           { icon: renderToString(<Pentagon size={20} />), title: 'Polygon', action: 'Polygon' },
           { icon: renderToString(<Circle size={20} />), title: 'Kreis', action: 'Circle' },

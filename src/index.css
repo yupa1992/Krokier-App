@@ -200,7 +200,7 @@ body {
   background: #555;
 }
 
-/* ✅ NEUE EINHEITLICHE TOOLBAR */
+/* ✅ NEUE EINHEITLICHE TOOLBAR - UNTER HEADER! */
 .unified-toolbar {
   background: white !important;
   padding: 12px !important;
@@ -208,6 +208,13 @@ body {
   box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
   pointer-events: auto !important;
   z-index: 400 !important;
+  margin-top: 80px !important;
+}
+
+/* Leaflet topleft Container auch nach unten */
+.leaflet-top.leaflet-left {
+  top: 0 !important;
+  padding-top: 80px !important;
 }
 
 .unified-toolbar button {
