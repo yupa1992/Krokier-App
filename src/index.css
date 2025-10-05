@@ -206,6 +206,8 @@ body {
   padding: 12px !important;
   border-radius: 12px !important;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+  pointer-events: auto !important;
+  z-index: 400 !important;
 }
 
 .unified-toolbar button {

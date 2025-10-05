@@ -5,7 +5,7 @@ import L from 'leaflet'
 import '@geoman-io/leaflet-geoman-free'
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css'
 // Export wird jetzt mit html2canvas gemacht
-import { X, Edit2, Check, Upload, Plus, Minus, Locate } from 'lucide-react'
+import { X, Edit2, Check, Upload } from 'lucide-react'
 
 // Fix for default marker icons in Leaflet
 delete L.Icon.Default.prototype._getIconUrl
@@ -15,48 +15,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 })
 
-// Zoom Control Component
-const ZoomControl = () => {
-  const map = useMap()
-  
-  const handleZoomIn = () => {
-    map.zoomIn()
-  }
-  
-  const handleZoomOut = () => {
-    map.zoomOut()
-  }
-  
-  const handleLocate = () => {
-    map.locate({ setView: true, maxZoom: 16 })
-  }
-  
-  return (
-    <div className="absolute top-20 left-4 z-[1000] flex flex-col gap-2">
-      <button
-        onClick={handleZoomIn}
-        className="bg-white hover:bg-gray-100 text-gray-800 p-3 rounded-lg shadow-lg border-2 border-gray-300 transition-all"
-        title="Hineinzoomen"
-      >
-        <Plus className="w-6 h-6" />
-      </button>
-      <button
-        onClick={handleZoomOut}
-        className="bg-white hover:bg-gray-100 text-gray-800 p-3 rounded-lg shadow-lg border-2 border-gray-300 transition-all"
-        title="Herauszoomen"
-      >
-        <Minus className="w-6 h-6" />
-      </button>
-      <button
-        onClick={handleLocate}
-        className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg shadow-lg border-2 border-blue-700 transition-all"
-        title="Meine Position"
-      >
-        <Locate className="w-6 h-6" />
-      </button>
-    </div>
-  )
-}
+// Zoom Control entfernt - Leaflet hat eigene Zoom-Controls
 
 // Geoman Draw Control - Bessere Zeichenwerkzeuge
 const DrawControl = () => {
@@ -771,7 +730,6 @@ const MapComponent = forwardRef(({
       {/* TileLayer wird jetzt vom Layer-Switcher gesteuert */}
       
       <DrawControl />
-      <ZoomControl />
       
       <DropZone onAddSymbol={onAddSymbol} onAddImage={onAddImage} isLocked={isLocked} />
 
