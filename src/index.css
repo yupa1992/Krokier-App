@@ -222,6 +222,11 @@ body {
   display: none !important;
 }
 
+/* Verstecke Leaflet's eigene Zoom-Controls */
+.leaflet-control-zoom {
+  display: none !important;
+}
+
 /* Leaflet Controls unter Header */
 .leaflet-top.leaflet-left {
   top: 0 !important;

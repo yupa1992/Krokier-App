@@ -15,48 +15,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 })
 
-// Zoom Control Component
-const ZoomControl = () => {
-  const map = useMap()
-  
-  const handleZoomIn = () => {
-    map.zoomIn()
-  }
-  
-  const handleZoomOut = () => {
-    map.zoomOut()
-  }
-  
-  const handleLocate = () => {
-    map.locate({ setView: true, maxZoom: 16 })
-  }
-  
-  return (
-    <div className="absolute top-20 left-4 z-[1000] flex flex-col gap-2">
-      <button
-        onClick={handleZoomIn}
-        className="bg-white hover:bg-gray-100 text-gray-800 p-3 rounded-lg shadow-lg border-2 border-gray-300 transition-all"
-        title="Hineinzoomen"
-      >
-        <Plus className="w-6 h-6" />
-      </button>
-      <button
-        onClick={handleZoomOut}
-        className="bg-white hover:bg-gray-100 text-gray-800 p-3 rounded-lg shadow-lg border-2 border-gray-300 transition-all"
-        title="Herauszoomen"
-      >
-        <Minus className="w-6 h-6" />
-      </button>
-      <button
-        onClick={handleLocate}
-        className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg shadow-lg border-2 border-blue-700 transition-all"
-        title="Meine Position"
-      >
-        <Locate className="w-6 h-6" />
-      </button>
-    </div>
-  )
-}
+// ZoomControl entfernt - Zoom-Buttons sind jetzt in Custom Toolbar!
 
 // Geoman Draw Control - Bessere Zeichenwerkzeuge
 const DrawControl = () => {
@@ -236,6 +195,63 @@ const DrawControl = () => {
               }
             })
           })
+        })
+        
+        // Trennlinie 2
+        const divider2 = L.DomUtil.create('div', '', container)
+        divider2.style.cssText = 'height: 1px; background: #e5e7eb; margin: 4px 0;'
+        
+        // Zoom Buttons
+        const zoomInBtn = L.DomUtil.create('button', 'zoom-btn', container)
+        zoomInBtn.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2"/></svg>'
+        zoomInBtn.title = 'Hineinzoomen'
+        zoomInBtn.style.cssText = `
+          width: 36px;
+          height: 36px;
+          border: 2px solid #e5e7eb;
+          border-radius: 6px;
+          background: white;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s;
+        `
+        L.DomEvent.on(zoomInBtn, 'click', function(e) {
+          L.DomEvent.stopPropagation(e)
+          map.zoomIn()
+        })
+        L.DomEvent.on(zoomInBtn, 'mouseenter', function() {
+          zoomInBtn.style.background = '#f3f4f6'
+        })
+        L.DomEvent.on(zoomInBtn, 'mouseleave', function() {
+          zoomInBtn.style.background = 'white'
+        })
+        
+        const zoomOutBtn = L.DomUtil.create('button', 'zoom-btn', container)
+        zoomOutBtn.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20"><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2"/></svg>'
+        zoomOutBtn.title = 'Herauszoomen'
+        zoomOutBtn.style.cssText = `
+          width: 36px;
+          height: 36px;
+          border: 2px solid #e5e7eb;
+          border-radius: 6px;
+          background: white;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s;
+        `
+        L.DomEvent.on(zoomOutBtn, 'click', function(e) {
+          L.DomEvent.stopPropagation(e)
+          map.zoomOut()
+        })
+        L.DomEvent.on(zoomOutBtn, 'mouseenter', function() {
+          zoomOutBtn.style.background = '#f3f4f6'
+        })
+        L.DomEvent.on(zoomOutBtn, 'mouseleave', function() {
+          zoomOutBtn.style.background = 'white'
         })
         
         return container
@@ -831,7 +847,6 @@ const MapComponent = forwardRef(({
       {/* TileLayer wird jetzt vom Layer-Switcher gesteuert */}
       
       <DrawControl />
-      <ZoomControl />
       
       <DropZone onAddSymbol={onAddSymbol} onAddImage={onAddImage} isLocked={isLocked} />
 
