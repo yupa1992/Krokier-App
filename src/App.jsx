@@ -172,70 +172,6 @@ function App() {
     }
   }
 
-  // Standort suchen mit Nominatim (OpenStreetMap Geocoding)
-  const handleSearchLocation = async () => {
-    const location = prompt('🔍 Standort suchen:\n\nGeben Sie eine Adresse, Stadt oder Koordinaten ein:')
-    
-    if (!location) return
-    
-    try {
-      // Prüfe ob es Koordinaten sind (lat,lng)
-      const coordMatch = location.match(/^(-?\d+\.?\d*),\s*(-?\d+\.?\d*)$/)
-      if (coordMatch) {
-        const lat = parseFloat(coordMatch[1])
-        const lng = parseFloat(coordMatch[2])
-        
-        if (mapRef.current) {
-          const map = mapRef.current
-          map.setView([lat, lng], 16)
-          
-          // Marker setzen
-          const marker = L.marker([lat, lng]).addTo(map)
-          marker.bindPopup(`📍 ${location}`).openPopup()
-          
-          console.log(`🎯 Koordinaten gefunden: ${lat}, ${lng}`)
-        }
-        return
-      }
-      
-      // Geocoding mit Nominatim
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}&limit=1&addressdetails=1`
-      )
-      
-      if (!response.ok) {
-        throw new Error('Geocoding-Service nicht verfügbar')
-      }
-      
-      const data = await response.json()
-      
-      if (data.length === 0) {
-        alert(`❌ Standort "${location}" nicht gefunden.\n\nVersuchen Sie:\n- Eine andere Schreibweise\n- Stadt, Land\n- Koordinaten (lat,lng)`)
-        return
-      }
-      
-      const result = data[0]
-      const lat = parseFloat(result.lat)
-      const lng = parseFloat(result.lon)
-      
-      if (mapRef.current) {
-        const map = mapRef.current
-        map.setView([lat, lng], 16)
-        
-        // Marker mit Info setzen
-        const marker = L.marker([lat, lng]).addTo(map)
-        const displayName = result.display_name || location
-        marker.bindPopup(`📍 ${displayName}`).openPopup()
-        
-        console.log(`🎯 Standort gefunden: ${displayName} (${lat}, ${lng})`)
-      }
-      
-    } catch (error) {
-      console.error('Geocoding-Fehler:', error)
-      alert(`❌ Fehler bei der Standortsuche: ${error.message}\n\nVerwenden Sie die Zoom-Buttons oder ziehen Sie die Karte manuell.`)
-    }
-  }
-
   const handleLoad = (event) => {
     const file = event.target.files[0]
     if (!file) return
@@ -270,7 +206,6 @@ function App() {
       <div className="flex flex-col h-screen bg-slate-50">
         <Toolbar
           onNewDrawing={handleNewDrawing}
-          onSearchLocation={handleSearchLocation}
           onLoad={handleLoad}
           onToggleFullscreen={toggleFullscreen}
           isFullscreen={isFullscreen}

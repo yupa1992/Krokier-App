@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
-import { Clock, Maximize, Minimize, Upload, Lock, Unlock, Settings, Download, Menu, X, MapPin, FilePlus } from 'lucide-react'
+import { Clock, Maximize, Minimize, Upload, Lock, Unlock, Settings, Download, Menu, X, FilePlus } from 'lucide-react'
 import domtoimage from 'dom-to-image-more'
 import jsPDF from 'jspdf'
 
-const Toolbar = ({ onNewDrawing, onSearchLocation, onLoad, onToggleFullscreen, isFullscreen, mapRef, isMapLocked, onToggleLock, onShowAdmin, logo }) => {
+const Toolbar = ({ onNewDrawing, onLoad, onToggleFullscreen, isFullscreen, mapRef, isMapLocked, onToggleLock, onShowAdmin, logo }) => {
   const [currentTime, setCurrentTime] = useState(new Date())
   const [showExportMenu, setShowExportMenu] = useState(false)
   const [einsatzort, setEinsatzort] = useState('')
@@ -35,87 +35,71 @@ const Toolbar = ({ onNewDrawing, onSearchLocation, onLoad, onToggleFullscreen, i
     setShowExportMenu(false)
     
     try {
-      console.log('🖼️ Starte PNG Export...')
+      console.log('🖼️ Starte PNG Export mit leaflet-simple-map-screenshoter...')
       
-      // Methode 1: leaflet-simple-map-screenshoter (bevorzugt)
-      if (window.mapScreenshoter) {
-        console.log('✅ Verwende SimpleMapScreenshoter')
-        
-        const format = 'png'
-        const overridedPluginOptions = {
-          mimeType: 'image/png',
-          caption: (map) => {
-            const now = new Date()
-            const datum = formatDate(now)
-            const zeit = formatTime(now)
-            const ort = einsatzort || 'Einsatzort nicht angegeben'
-            return `${ort} | ${datum} ${zeit}`
-          },
-          captionFontSize: 16,
-          captionFont: 'Arial, sans-serif',
-          captionColor: 'white',
-          captionBgColor: 'rgba(0, 0, 0, 0.7)',
-          captionOffset: 10
-        }
-        
-        try {
-          const blob = await window.mapScreenshoter.takeScreen(format, overridedPluginOptions)
-          const link = document.createElement('a')
-          const date = new Date().toISOString().split('T')[0]
-          const time = new Date().toTimeString().split(' ')[0].replace(/:/g, '-')
-          const filename = einsatzort ? 
-            `${einsatzort.replace(/\s+/g, '_')}-${date}-${time}.png` : 
-            `karte-${date}-${time}.png`
-          
-          link.download = filename
-          link.href = URL.createObjectURL(blob)
-          link.click()
-          
-          console.log(`✅ PNG Export erfolgreich: ${filename}`)
-          alert(`✅ Karte exportiert als: ${filename}`)
-          
-        } catch (screenshotError) {
-          console.error('Screenshot Fehler:', screenshotError)
-          throw screenshotError
-        }
-        
-      } else {
-        // Methode 2: Fallback mit dom-to-image
-        console.log('⚠️ SimpleMapScreenshoter nicht verfügbar, verwende Fallback')
-        
-        const mapContainer = document.querySelector('.leaflet-container')
-        if (!mapContainer) {
-          throw new Error('Karten-Container nicht gefunden')
-        }
-        
-        const canvas = await domtoimage.toCanvas(mapContainer, {
-          quality: 1,
-          bgcolor: '#ffffff',
-          width: mapContainer.offsetWidth,
-          height: mapContainer.offsetHeight
-        })
-        
-        // Canvas zu Blob konvertieren
-        canvas.toBlob((blob) => {
-          const link = document.createElement('a')
-          const date = new Date().toISOString().split('T')[0]
-          const time = new Date().toTimeString().split(' ')[0].replace(/:/g, '-')
-          const filename = einsatzort ? 
-            `${einsatzort.replace(/\s+/g, '_')}-${date}-${time}.png` : 
-            `karte-${date}-${time}.png`
-          
-          link.download = filename
-          link.href = URL.createObjectURL(blob)
-          link.click()
-          
-          console.log(`✅ PNG Export (Fallback) erfolgreich: ${filename}`)
-          alert(`✅ Karte exportiert als: ${filename}`)
-        }, 'image/png')
+      if (!mapRef || !mapRef.current) {
+        throw new Error('Karte nicht gefunden. Bitte warten Sie bis die Karte geladen ist.')
       }
+      
+      const map = mapRef.current
+      
+      // Prüfe ob SimpleMapScreenshoter verfügbar ist
+      if (!window.mapScreenshoter) {
+        console.warn('⚠️ SimpleMapScreenshoter nicht initialisiert, warte 2 Sekunden...')
+        await new Promise(resolve => setTimeout(resolve, 2000))
+        
+        if (!window.mapScreenshoter) {
+          throw new Error('Export-Bibliothek nicht geladen. Bitte laden Sie die Seite neu.')
+        }
+      }
+      
+      console.log('✅ SimpleMapScreenshoter gefunden, starte Export...')
+      
+      const now = new Date()
+      const datum = formatDate(now)
+      const zeit = formatTime(now)
+      const ort = einsatzort || 'Einsatzort nicht angegeben'
+      
+      const options = {
+        mimeType: 'image/png',
+        caption: `${ort} | ${datum} ${zeit}`,
+        captionFontSize: 18,
+        captionFont: 'bold Arial, sans-serif',
+        captionColor: '#FFFFFF',
+        captionBgColor: 'rgba(0, 0, 0, 0.8)',
+        captionOffset: 15,
+        hideElementsWithSelectors: [
+          '.leaflet-control-container',
+          '.leaflet-top',
+          '.leaflet-bottom'
+        ]
+      }
+      
+      const blob = await window.mapScreenshoter.takeScreen('png', options)
+      
+      // Download
+      const link = document.createElement('a')
+      const date = new Date().toISOString().split('T')[0]
+      const time = new Date().toTimeString().split(' ')[0].replace(/:/g, '-')
+      const filename = einsatzort ? 
+        `${einsatzort.replace(/[^a-zA-Z0-9]/g, '_')}-${date}-${time}.png` : 
+        `Krokier_Karte-${date}-${time}.png`
+      
+      link.download = filename
+      link.href = URL.createObjectURL(blob)
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      
+      // Cleanup
+      setTimeout(() => URL.revokeObjectURL(link.href), 100)
+      
+      console.log(`✅ PNG Export erfolgreich: ${filename}`)
+      alert(`✅ Karte erfolgreich exportiert!\n\nDatei: ${filename}`)
       
     } catch (error) {
       console.error('❌ PNG Export Fehler:', error)
-      alert(`❌ Export fehlgeschlagen: ${error.message}\n\nVersuchen Sie:\n- Warten bis die Karte vollständig geladen ist\n- Browser neu laden\n- Einen anderen Browser`)
+      alert(`❌ Export fehlgeschlagen!\n\nFehler: ${error.message}\n\nLösungen:\n• Warten Sie bis die Karte vollständig geladen ist\n• Laden Sie die Seite neu (F5)\n• Überprüfen Sie Ihre Internetverbindung`)
     }
   }
 
@@ -178,15 +162,6 @@ const Toolbar = ({ onNewDrawing, onSearchLocation, onLoad, onToggleFullscreen, i
             >
               <FilePlus className="w-5 h-5" />
               <span>Neue Zeichnung</span>
-            </button>
-
-            <button
-              onClick={onSearchLocation}
-              className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors font-semibold shadow-md"
-              title="Standort suchen"
-            >
-              <MapPin className="w-5 h-5" />
-              <span>Standort suchen</span>
             </button>
 
             <button
