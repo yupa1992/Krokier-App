@@ -68,7 +68,7 @@ const DrawControl = () => {
     if (initRef.current) return
     initRef.current = true
 
-    // Geoman Toolbar hinzufügen - NUR WICHTIGE TOOLS
+    // Geoman Toolbar mit METER-ANZEIGE & Canvas-Renderer
     map.pm.addControls({
       position: 'topleft',
       drawCircle: true,
@@ -84,6 +84,24 @@ const DrawControl = () => {
       drawText: false,
       cutPolygon: false,
       rotateMode: false,
+    })
+    
+    // METER-ANZEIGE aktivieren
+    map.pm.setGlobalOptions({
+      measurements: { 
+        measurement: true,
+        displayFormat: 'metric',
+        showSegmentLength: true,
+        showTotalLength: true
+      },
+      pathOptions: {
+        color: '#EF4444',
+        fillColor: '#EF4444',
+        fillOpacity: 0.4,
+        weight: 3,
+      },
+      // Canvas-Renderer für bessere Performance
+      preferCanvas: true
     })
 
     // Farb-Toolbar erstellen
@@ -657,6 +675,7 @@ const MapComponent = forwardRef(({
       zoomControl={!isLocked}
       dragging={!isLocked}
       scrollWheelZoom={!isLocked}
+      preferCanvas={true}
     >
       {/* TileLayer wird jetzt vom Layer-Switcher gesteuert */}
       
