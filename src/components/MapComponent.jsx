@@ -68,20 +68,21 @@ const DrawControl = () => {
     if (initRef.current) return
     initRef.current = true
 
-    // Geoman Toolbar hinzufügen
+    // Geoman Toolbar hinzufügen - NUR WICHTIGE TOOLS
     map.pm.addControls({
       position: 'topleft',
       drawCircle: true,
-      drawCircleMarker: false,
       drawPolyline: true,
       drawRectangle: true,
       drawPolygon: true,
-      drawMarker: false,
-      drawText: false,
       editMode: true,
       dragMode: true,
-      cutPolygon: true,
       removalMode: true,
+      // ALLES ANDERE DEAKTIVIERT
+      drawCircleMarker: false,
+      drawMarker: false,
+      drawText: false,
+      cutPolygon: false,
       rotateMode: false,
     })
 
@@ -219,18 +220,17 @@ const DrawControl = () => {
 
     // Simple Map Screenshoter - Professionelle Screenshot-Bibliothek
     const screenshoter = new SimpleMapScreenshoter({
-      hidden: true, // Verstecke den Button
-      preventDownload: true, // Wir machen Download selbst
-      hideElementsWithSelectors: ['.leaflet-control-container'], // Versteckt ALLE Controls
-      cropImageByInnerWH: true, // Schneide leere Bereiche ab
-      mimeType: 'image/png',
-      domtoimageOptions: {
-        // Wichtig: Verhindert Tile-Grenzen im Screenshot
-        style: {
-          'image-rendering': 'auto',
-          '-webkit-font-smoothing': 'antialiased'
-        }
-      }
+      hidden: true,
+      preventDownload: true,
+      hideElementsWithSelectors: [
+        '.leaflet-control-zoom',
+        '.leaflet-control-layers',
+        '.leaflet-pm-toolbar',
+        '.leaflet-bar',
+        '.leaflet-control'
+      ],
+      cropImageByInnerWH: false,
+      mimeType: 'image/png'
     }).addTo(map)
     
     // Entferne Tile-Grenzen und Marker-Rahmen vor dem Screenshot
