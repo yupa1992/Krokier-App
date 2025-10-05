@@ -25,6 +25,7 @@
     "jspdf": "^2.5.1",
     "leaflet": "^1.9.4",
     "leaflet-draw": "^1.0.4",
+    "leaflet-easyprint": "^2.1.9",
     "leaflet-freehandshapes": "^0.3.11",
     "leaflet-geometryutil": "^0.10.3",
     "leaflet-simple-map-screenshoter": "^0.5.0",

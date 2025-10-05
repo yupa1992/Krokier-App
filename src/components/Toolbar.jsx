@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Clock, Maximize, Minimize, Upload, Lock, Unlock, Settings, Download, Menu, X, FilePlus } from 'lucide-react'
-import domtoimage from 'dom-to-image-more'
+import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
 
 const Toolbar = ({ onNewDrawing, onLoad, onToggleFullscreen, isFullscreen, mapRef, isMapLocked, onToggleLock, onShowAdmin, logo }) => {
@@ -34,58 +34,58 @@ const Toolbar = ({ onNewDrawing, onLoad, onToggleFullscreen, isFullscreen, mapRe
   const handleExportPNG = async () => {
     setShowExportMenu(false)
     
-    if (!window.mapScreenshoter) {
-      alert('❌ Export nicht verfügbar!\n\nBitte warten Sie 5 Sekunden bis die Karte vollständig geladen ist und versuchen Sie es erneut.')
-      return
-    }
-    
     try {
       const now = new Date()
       const datum = formatDate(now)
       const zeit = formatTime(now)
       const ort = einsatzort || 'Krokier Karte'
       
-      // Verstecke Sidebar & Toolbar temporär
+      // Verstecke UI-Elemente
       const sidebar = document.querySelector('.w-80, .w-96')
       const toolbar = document.querySelector('.absolute.top-0')
-      const sidebarDisplay = sidebar?.style.display
-      const toolbarDisplay = toolbar?.style.display
-      
       if (sidebar) sidebar.style.display = 'none'
       if (toolbar) toolbar.style.display = 'none'
       
-      // Warte kurz damit Layout neu berechnet wird
-      await new Promise(resolve => setTimeout(resolve, 100))
+      // Warte kurz
+      await new Promise(resolve => setTimeout(resolve, 300))
       
-      const blob = await window.mapScreenshoter.takeScreen('png', {
-        caption: `${ort} | ${datum} ${zeit}`,
-        captionFontSize: 14,
-        captionFont: 'bold Arial',
-        captionColor: '#FFFFFF',
-        captionBgColor: 'rgba(0, 0, 0, 0.7)',
-        captionOffset: 5
+      // Finde Leaflet Container
+      const mapContainer = document.querySelector('.leaflet-container')
+      if (!mapContainer) throw new Error('Karte nicht gefunden')
+      
+      // Screenshot mit html2canvas
+      const canvas = await html2canvas(mapContainer, {
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        scale: 2,
+        logging: false
       })
       
-      // Zeige Sidebar & Toolbar wieder
-      if (sidebar) sidebar.style.display = sidebarDisplay || ''
-      if (toolbar) toolbar.style.display = toolbarDisplay || ''
+      // Zeige UI wieder
+      if (sidebar) sidebar.style.display = ''
+      if (toolbar) toolbar.style.display = ''
       
-      const link = document.createElement('a')
-      const filename = `${ort.replace(/[^a-zA-Z0-9]/g, '_')}-${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.png`
-      link.download = filename
-      link.href = URL.createObjectURL(blob)
-      link.click()
-      setTimeout(() => URL.revokeObjectURL(link.href), 100)
-      
-      alert(`✅ Exportiert: ${filename}`)
+      // Download
+      canvas.toBlob((blob) => {
+        const link = document.createElement('a')
+        const filename = `${ort.replace(/[^a-zA-Z0-9]/g, '_')}-${datum.replace(/\./g, '-')}-${zeit.replace(/:/g, '-')}.png`
+        link.download = filename
+        link.href = URL.createObjectURL(blob)
+        link.click()
+        setTimeout(() => URL.revokeObjectURL(link.href), 100)
+        
+        console.log(`✅ Exportiert: ${filename}`)
+      })
       
     } catch (error) {
-      // Stelle sicher dass Sidebar & Toolbar wieder da sind
+      // UI wiederherstellen
       const sidebar = document.querySelector('.w-80, .w-96')
       const toolbar = document.querySelector('.absolute.top-0')
       if (sidebar) sidebar.style.display = ''
       if (toolbar) toolbar.style.display = ''
       
+      console.error('Export-Fehler:', error)
       alert(`❌ Export fehlgeschlagen: ${error.message}`)
     }
   }

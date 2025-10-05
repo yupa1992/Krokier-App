@@ -4,7 +4,7 @@ import { useDrop } from 'react-dnd'
 import L from 'leaflet'
 import '@geoman-io/leaflet-geoman-free'
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css'
-import SimpleMapScreenshoter from 'leaflet-simple-map-screenshoter'
+// Export wird jetzt mit html2canvas gemacht
 import { X, Edit2, Check, Upload, Plus, Minus, Locate } from 'lucide-react'
 
 // Fix for default marker icons in Leaflet
@@ -218,58 +218,8 @@ const DrawControl = () => {
     const layerControl = new LayerControl({ position: 'bottomright' })
     map.addControl(layerControl)
 
-    // Simple Map Screenshoter - NUR die Karte, nicht der ganze Viewport
-    const screenshoter = new SimpleMapScreenshoter({
-      hidden: true,
-      preventDownload: true,
-      hideElementsWithSelectors: [
-        '.leaflet-control-zoom',
-        '.leaflet-control-layers',
-        '.leaflet-pm-toolbar',
-        '.leaflet-bar',
-        '.leaflet-control'
-      ],
-      cropImageByInnerWH: true,
-      screenName: 'karte'
-    }).addTo(map)
-    
-    // Entferne Tile-Grenzen und Marker-Rahmen vor dem Screenshot
-    map.on('simpleMapScreenshoter.takeScreen', () => {
-      console.log('📸 Screenshot wird erstellt, blende unnötige Elemente aus...')
-      
-      // Entferne alle Tile-Grenzen
-      const tiles = document.querySelectorAll('.leaflet-tile')
-      tiles.forEach(tile => {
-        tile.style.border = 'none'
-        tile.style.outline = 'none'
-      })
-      
-      // Entferne ALLE Rahmen und Boxen um Marker
-      const markers = document.querySelectorAll('.leaflet-marker-icon, .leaflet-marker-icon > div, .custom-marker, .custom-marker > div')
-      markers.forEach(marker => {
-        marker.style.border = 'none'
-        marker.style.outline = 'none'
-        marker.style.boxShadow = 'none'
-        marker.style.background = 'transparent'
-        
-        // Entferne auch alle Child-Divs die Rahmen haben könnten
-        const children = marker.querySelectorAll('div')
-        children.forEach(child => {
-          if (child.style.border || child.style.outline || child.style.background) {
-            child.style.border = 'none'
-            child.style.outline = 'none'
-            child.style.boxShadow = 'none'
-            // Nur wenn es NICHT das Icon-Bild ist
-            if (!child.querySelector('img')) {
-              child.style.background = 'transparent'
-            }
-          }
-        })
-      })
-    })
-
-    // Mache Screenshoter global verfügbar
-    window.mapScreenshoter = screenshoter
+    // Export wird jetzt mit html2canvas in Toolbar.jsx gemacht
+    // Keine zusätzliche Bibliothek nötig!
 
     // Deutsche Übersetzungen
     map.pm.setLang('de', {
