@@ -35,8 +35,12 @@ const Toolbar = ({ onNewDrawing, onSearchLocation, onLoad, onToggleFullscreen, i
     setShowExportMenu(false)
     
     try {
-      // Verwende leaflet-simple-map-screenshoter (professionelle Bibliothek)
+      console.log('🖼️ Starte PNG Export...')
+      
+      // Methode 1: leaflet-simple-map-screenshoter (bevorzugt)
       if (window.mapScreenshoter) {
+        console.log('✅ Verwende SimpleMapScreenshoter')
+        
         const format = 'png'
         const overridedPluginOptions = {
           mimeType: 'image/png',
@@ -54,23 +58,64 @@ const Toolbar = ({ onNewDrawing, onSearchLocation, onLoad, onToggleFullscreen, i
           captionOffset: 10
         }
         
-        window.mapScreenshoter.takeScreen(format, overridedPluginOptions).then(blob => {
+        try {
+          const blob = await window.mapScreenshoter.takeScreen(format, overridedPluginOptions)
           const link = document.createElement('a')
           const date = new Date().toISOString().split('T')[0]
-          const filename = einsatzort ? `${einsatzort.replace(/\s+/g, '_')}-${date}.png` : `karte-${date}.png`
+          const time = new Date().toTimeString().split(' ')[0].replace(/:/g, '-')
+          const filename = einsatzort ? 
+            `${einsatzort.replace(/\s+/g, '_')}-${date}-${time}.png` : 
+            `karte-${date}-${time}.png`
+          
           link.download = filename
           link.href = URL.createObjectURL(blob)
           link.click()
-        }).catch(e => {
-          console.error('Screenshot Fehler:', e)
-          alert('Export fehlgeschlagen: ' + e.message)
-        })
+          
+          console.log(`✅ PNG Export erfolgreich: ${filename}`)
+          alert(`✅ Karte exportiert als: ${filename}`)
+          
+        } catch (screenshotError) {
+          console.error('Screenshot Fehler:', screenshotError)
+          throw screenshotError
+        }
+        
       } else {
-        alert('Export-Funktion nicht verfügbar. Bitte warten Sie bis die Karte geladen ist.')
+        // Methode 2: Fallback mit dom-to-image
+        console.log('⚠️ SimpleMapScreenshoter nicht verfügbar, verwende Fallback')
+        
+        const mapContainer = document.querySelector('.leaflet-container')
+        if (!mapContainer) {
+          throw new Error('Karten-Container nicht gefunden')
+        }
+        
+        const canvas = await domtoimage.toCanvas(mapContainer, {
+          quality: 1,
+          bgcolor: '#ffffff',
+          width: mapContainer.offsetWidth,
+          height: mapContainer.offsetHeight
+        })
+        
+        // Canvas zu Blob konvertieren
+        canvas.toBlob((blob) => {
+          const link = document.createElement('a')
+          const date = new Date().toISOString().split('T')[0]
+          const time = new Date().toTimeString().split(' ')[0].replace(/:/g, '-')
+          const filename = einsatzort ? 
+            `${einsatzort.replace(/\s+/g, '_')}-${date}-${time}.png` : 
+            `karte-${date}-${time}.png`
+          
+          link.download = filename
+          link.href = URL.createObjectURL(blob)
+          link.click()
+          
+          console.log(`✅ PNG Export (Fallback) erfolgreich: ${filename}`)
+          alert(`✅ Karte exportiert als: ${filename}`)
+        }, 'image/png')
       }
+      
     } catch (error) {
-      console.error('PNG Export Fehler:', error)
-      alert('PNG Export fehlgeschlagen: ' + error.message)
+      console.error('❌ PNG Export Fehler:', error)
+      alert(`❌ Export fehlgeschlagen: ${error.message}\n\nVersuchen Sie:\n- Warten bis die Karte vollständig geladen ist\n- Browser neu laden\n- Einen anderen Browser`)
     }
   }
 
