@@ -199,3 +199,31 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
+
+/* ✅ CUSTOM TOOLBAR STYLING */
+.custom-toolbar {
+  background: white !important;
+  padding: 8px !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+  margin-top: 80px !important;
+}
+
+.custom-toolbar button {
+  transition: all 0.2s ease !important;
+}
+
+.custom-toolbar button:hover {
+  transform: scale(1.05) !important;
+}
+
+/* Verstecke Geoman Toolbar komplett */
+.leaflet-pm-toolbar {
+  display: none !important;
+}
+
+/* Leaflet Controls unter Header */
+.leaflet-top.leaflet-left {
+  top: 0 !important;
+  padding-top: 80px !important;
+}

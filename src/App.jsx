@@ -242,7 +242,7 @@ function App() {
             />
           </div>
           
-          <div className="w-80 md:w-96 overflow-y-auto">
+          <div className="w-80 md:w-96 overflow-y-auto pt-20">
             <Sidebar isLocked={isMapLocked} />
           </div>
         </div>

@@ -68,63 +68,172 @@ const DrawControl = () => {
     if (initRef.current) return
     initRef.current = true
 
-    // Geoman Toolbar hinzufügen
+    // Geoman Toolbar VERSTECKEN - wir bauen eigene!
     map.pm.addControls({
       position: 'topleft',
-      drawCircle: true,
+      drawCircle: false,
       drawCircleMarker: false,
-      drawPolyline: true,
-      drawRectangle: true,
-      drawPolygon: true,
+      drawPolyline: false,
+      drawRectangle: false,
+      drawPolygon: false,
       drawMarker: false,
       drawText: false,
-      editMode: true,
-      dragMode: true,
-      cutPolygon: true,
-      removalMode: true,
+      editMode: false,
+      dragMode: false,
+      cutPolygon: false,
+      removalMode: false,
       rotateMode: false,
     })
+    
+    // Meter-Anzeige aktivieren
+    map.pm.setGlobalOptions({
+      measurements: { 
+        measurement: true,
+        displayFormat: 'metric',
+        showSegmentLength: true,
+        showTotalLength: true
+      },
+      pathOptions: {
+        color: '#EF4444',
+        fillColor: '#EF4444',
+        fillOpacity: 0.4,
+        weight: 3,
+      }
+    })
 
-    // Farb-Toolbar erstellen
-    const ColorControl = L.Control.extend({
+    // 🎨 CUSTOM TOOLBAR mit DEINEN Icons!
+    const CustomToolbar = L.Control.extend({
       onAdd: function() {
-        const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control')
-        container.style.background = 'white'
-        container.style.padding = '8px'
-        container.style.borderRadius = '4px'
-        container.innerHTML = `
-          <div style="display: flex; flex-direction: column; gap: 6px;">
-            <p style="font-size: 11px; font-weight: bold; margin: 0 0 4px 0; text-align: center;">Farbe</p>
-            <button class="color-btn" data-color="#EF4444" style="width: 30px; height: 30px; background: #EF4444; border: 3px solid #000; border-radius: 4px; cursor: pointer;"></button>
-            <button class="color-btn" data-color="#000000" style="width: 30px; height: 30px; background: #000000; border: 2px solid #ccc; border-radius: 4px; cursor: pointer;"></button>
-            <button class="color-btn" data-color="#3B82F6" style="width: 30px; height: 30px; background: #3B82F6; border: 2px solid #ccc; border-radius: 4px; cursor: pointer;"></button>
-            <button class="color-btn" data-color="#10B981" style="width: 30px; height: 30px; background: #10B981; border: 2px solid #ccc; border-radius: 4px; cursor: pointer;"></button>
-            <button class="color-btn" data-color="#F59E0B" style="width: 30px; height: 30px; background: #F59E0B; border: 2px solid #ccc; border-radius: 4px; cursor: pointer;"></button>
-            <button class="color-btn" data-color="#8B5CF6" style="width: 30px; height: 30px; background: #8B5CF6; border: 2px solid #ccc; border-radius: 4px; cursor: pointer;"></button>
-          </div>
+        const container = L.DomUtil.create('div', 'custom-toolbar')
+        container.style.cssText = `
+          background: white;
+          padding: 8px;
+          border-radius: 8px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          margin-top: 80px;
         `
         
-        // Event Listener für Farb-Buttons
-        container.querySelectorAll('.color-btn').forEach(btn => {
+        let currentColor = '#EF4444'
+        
+        // Tools basierend auf deinen Icons
+        const tools = [
+          { svg: '<svg viewBox="0 0 24 24" width="20" height="20"><circle cx="6" cy="6" r="2" fill="currentColor"/><circle cx="18" cy="18" r="2" fill="currentColor"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2"/></svg>', title: 'Linie', action: 'Line' },
+          { svg: '<svg viewBox="0 0 24 24" width="20" height="20"><rect x="4" y="4" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"/></svg>', title: 'Rechteck', action: 'Rectangle' },
+          { svg: '<svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 2 L22 22 L2 22 Z" fill="none" stroke="currentColor" stroke-width="2"/></svg>', title: 'Polygon', action: 'Polygon' },
+          { svg: '<svg viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/></svg>', title: 'Kreis', action: 'Circle' },
+          { svg: '<svg viewBox="0 0 24 24" width="20" height="20"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z M20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="currentColor"/></svg>', title: 'Bearbeiten', action: 'Edit' },
+          { svg: '<svg viewBox="0 0 24 24" width="20" height="20"><path d="M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6V7l-5 5 5 5v-3h3v-4zm14 2l-5-5v3h-3v4h3v3l5-5zm-9 3h-4v3H7l5 5 5-5h-3v-3z" fill="currentColor"/></svg>', title: 'Verschieben', action: 'Drag' },
+          { svg: '<svg viewBox="0 0 24 24" width="20" height="20"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" fill="currentColor"/></svg>', title: 'Löschen', action: 'Remove' }
+        ]
+        
+        tools.forEach(tool => {
+          const btn = L.DomUtil.create('button', 'tool-btn', container)
+          btn.innerHTML = tool.svg
+          btn.title = tool.title
+          btn.style.cssText = `
+            width: 36px;
+            height: 36px;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            padding: 6px;
+          `
+          
           L.DomEvent.on(btn, 'click', function(e) {
             L.DomEvent.stopPropagation(e)
-            const color = this.getAttribute('data-color')
+            
+            const isActive = btn.style.background === 'rgb(59, 130, 246)'
+            
+            // Alle Tools deaktivieren
+            map.pm.disableDraw()
+            map.pm.disableGlobalEditMode()
+            map.pm.disableGlobalDragMode()
+            map.pm.disableGlobalRemovalMode()
             
             // Alle Buttons zurücksetzen
-            container.querySelectorAll('.color-btn').forEach(b => {
-              b.style.border = '2px solid #ccc'
+            container.querySelectorAll('.tool-btn').forEach(b => {
+              b.style.background = 'white'
+              b.style.borderColor = '#e5e7eb'
             })
-            // Ausgewählten Button markieren
-            this.style.border = '3px solid #000'
             
-            // Farbe für neue Shapes setzen
+            if (!isActive) {
+              btn.style.background = '#3B82F6'
+              btn.style.borderColor = '#2563EB'
+              
+              if (tool.action === 'Edit') {
+                map.pm.enableGlobalEditMode()
+              } else if (tool.action === 'Drag') {
+                map.pm.enableGlobalDragMode()
+              } else if (tool.action === 'Remove') {
+                map.pm.enableGlobalRemovalMode()
+              } else {
+                map.pm.enableDraw(tool.action, {
+                  pathOptions: {
+                    color: currentColor,
+                    fillColor: currentColor,
+                    fillOpacity: 0.4,
+                    weight: 3
+                  }
+                })
+              }
+            }
+          })
+          
+          L.DomEvent.on(btn, 'mouseenter', function() {
+            if (btn.style.background !== 'rgb(59, 130, 246)') {
+              btn.style.background = '#f3f4f6'
+            }
+          })
+          
+          L.DomEvent.on(btn, 'mouseleave', function() {
+            if (btn.style.background !== 'rgb(59, 130, 246)') {
+              btn.style.background = 'white'
+            }
+          })
+        })
+        
+        // Trennlinie
+        const divider = L.DomUtil.create('div', '', container)
+        divider.style.cssText = 'height: 1px; background: #e5e7eb; margin: 4px 0;'
+        
+        // Farben
+        const colors = ['#EF4444', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#000000']
+        colors.forEach((color, index) => {
+          const colorBtn = L.DomUtil.create('button', 'color-btn', container)
+          colorBtn.style.cssText = `
+            width: 36px;
+            height: 36px;
+            border: ${index === 0 ? '3px' : '2px'} solid ${index === 0 ? '#000' : '#e5e7eb'};
+            border-radius: 6px;
+            background: ${color};
+            cursor: pointer;
+            transition: all 0.2s;
+          `
+          
+          L.DomEvent.on(colorBtn, 'click', function(e) {
+            L.DomEvent.stopPropagation(e)
+            currentColor = color
+            
+            container.querySelectorAll('.color-btn').forEach(b => {
+              b.style.border = '2px solid #e5e7eb'
+            })
+            colorBtn.style.border = '3px solid #000'
+            
             map.pm.setGlobalOptions({
               pathOptions: {
                 color: color,
                 fillColor: color,
                 fillOpacity: 0.4,
-                weight: 3,
-              },
+                weight: 3
+              }
             })
           })
         })
@@ -133,8 +242,8 @@ const DrawControl = () => {
       }
     })
 
-    const colorControl = new ColorControl({ position: 'topleft' })
-    map.addControl(colorControl)
+    const customToolbar = new CustomToolbar({ position: 'topleft' })
+    map.addControl(customToolbar)
 
     // Layer Switcher - Verschiedene Kartenansichten
     const LayerControl = L.Control.extend({
