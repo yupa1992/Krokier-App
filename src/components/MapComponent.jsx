@@ -4,9 +4,8 @@ import { useDrop } from 'react-dnd'
 import L from 'leaflet'
 import '@geoman-io/leaflet-geoman-free'
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css'
-// Export wird jetzt mit html2canvas gemacht
-import { X, Edit2, Check, Upload, Minus as MinusIcon, Plus as PlusIcon, Square, Circle, Pentagon, TrendingUp, Move, Trash2 } from 'lucide-react'
-import { renderToString } from 'react-dom/server'
+import SimpleMapScreenshoter from 'leaflet-simple-map-screenshoter'
+import { X, Edit2, Check, Upload, Plus, Minus, Locate } from 'lucide-react'
 
 // Fix for default marker icons in Leaflet
 delete L.Icon.Default.prototype._getIconUrl
@@ -16,7 +15,48 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 })
 
-// Zoom Control entfernt - Leaflet hat eigene Zoom-Controls
+// Zoom Control Component
+const ZoomControl = () => {
+  const map = useMap()
+  
+  const handleZoomIn = () => {
+    map.zoomIn()
+  }
+  
+  const handleZoomOut = () => {
+    map.zoomOut()
+  }
+  
+  const handleLocate = () => {
+    map.locate({ setView: true, maxZoom: 16 })
+  }
+  
+  return (
+    <div className="absolute top-20 left-4 z-[1000] flex flex-col gap-2">
+      <button
+        onClick={handleZoomIn}
+        className="bg-white hover:bg-gray-100 text-gray-800 p-3 rounded-lg shadow-lg border-2 border-gray-300 transition-all"
+        title="Hineinzoomen"
+      >
+        <Plus className="w-6 h-6" />
+      </button>
+      <button
+        onClick={handleZoomOut}
+        className="bg-white hover:bg-gray-100 text-gray-800 p-3 rounded-lg shadow-lg border-2 border-gray-300 transition-all"
+        title="Herauszoomen"
+      >
+        <Minus className="w-6 h-6" />
+      </button>
+      <button
+        onClick={handleLocate}
+        className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg shadow-lg border-2 border-blue-700 transition-all"
+        title="Meine Position"
+      >
+        <Locate className="w-6 h-6" />
+      </button>
+    </div>
+  )
+}
 
 // Geoman Draw Control - Bessere Zeichenwerkzeuge
 const DrawControl = () => {
@@ -28,271 +68,88 @@ const DrawControl = () => {
     if (initRef.current) return
     initRef.current = true
 
-    // ✨ NEUE PROFESSIONELLE TOOLBAR ✨
-    // Geoman OHNE Standard-Toolbar (wir bauen eigene!)
+    // Geoman Toolbar hinzufügen
     map.pm.addControls({
       position: 'topleft',
-      drawCircle: false,
-      drawPolyline: false,
-      drawRectangle: false,
-      drawPolygon: false,
-      editMode: false,
-      dragMode: false,
-      removalMode: false,
+      drawCircle: true,
       drawCircleMarker: false,
+      drawPolyline: true,
+      drawRectangle: true,
+      drawPolygon: true,
       drawMarker: false,
       drawText: false,
-      cutPolygon: false,
+      editMode: true,
+      dragMode: true,
+      cutPolygon: true,
+      removalMode: true,
       rotateMode: false,
     })
-    
-    // METER-ANZEIGE aktivieren
-    map.pm.setGlobalOptions({
-      measurements: { 
-        measurement: true,
-        displayFormat: 'metric',
-        showSegmentLength: true,
-        showTotalLength: true
-      },
-      pathOptions: {
-        color: '#EF4444',
-        fillColor: '#EF4444',
-        fillOpacity: 0.4,
-        weight: 3,
-      },
-      preferCanvas: true
-    })
 
-    // 🎨 NEUE EINHEITLICHE TOOLBAR
-    const UnifiedToolbar = L.Control.extend({
+    // Farb-Toolbar erstellen
+    const ColorControl = L.Control.extend({
       onAdd: function() {
-        const container = L.DomUtil.create('div', 'unified-toolbar')
-        container.style.cssText = `
-          background: white;
-          padding: 8px;
-          border-radius: 12px;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-          min-width: 60px;
+        const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control')
+        container.style.background = 'white'
+        container.style.padding = '8px'
+        container.style.borderRadius = '4px'
+        container.innerHTML = `
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <p style="font-size: 11px; font-weight: bold; margin: 0 0 4px 0; text-align: center;">Farbe</p>
+            <button class="color-btn" data-color="#EF4444" style="width: 30px; height: 30px; background: #EF4444; border: 3px solid #000; border-radius: 4px; cursor: pointer;"></button>
+            <button class="color-btn" data-color="#000000" style="width: 30px; height: 30px; background: #000000; border: 2px solid #ccc; border-radius: 4px; cursor: pointer;"></button>
+            <button class="color-btn" data-color="#3B82F6" style="width: 30px; height: 30px; background: #3B82F6; border: 2px solid #ccc; border-radius: 4px; cursor: pointer;"></button>
+            <button class="color-btn" data-color="#10B981" style="width: 30px; height: 30px; background: #10B981; border: 2px solid #ccc; border-radius: 4px; cursor: pointer;"></button>
+            <button class="color-btn" data-color="#F59E0B" style="width: 30px; height: 30px; background: #F59E0B; border: 2px solid #ccc; border-radius: 4px; cursor: pointer;"></button>
+            <button class="color-btn" data-color="#8B5CF6" style="width: 30px; height: 30px; background: #8B5CF6; border: 2px solid #ccc; border-radius: 4px; cursor: pointer;"></button>
+          </div>
         `
         
-        let currentColor = '#EF4444'
-        
-        // Zeichnen-Tools mit Lucide Icons (funktionieren garantiert!)
-        const tools = [
-          { icon: renderToString(<TrendingUp size={20} />), title: 'Linie zeichnen (mit Meter)', action: 'Line' },
-          { icon: renderToString(<Square size={20} />), title: 'Rechteck', action: 'Rectangle' },
-          { icon: renderToString(<Pentagon size={20} />), title: 'Polygon', action: 'Polygon' },
-          { icon: renderToString(<Circle size={20} />), title: 'Kreis', action: 'Circle' },
-          { icon: renderToString(<Edit2 size={20} />), title: 'Bearbeiten', action: 'Edit' },
-          { icon: renderToString(<Move size={20} />), title: 'Verschieben', action: 'Drag' },
-          { icon: renderToString(<Trash2 size={20} />), title: 'Löschen', action: 'Remove' }
-        ]
-        
-        tools.forEach(tool => {
-          const btn = L.DomUtil.create('button', 'tool-btn', container)
-          btn.innerHTML = tool.icon
-          btn.title = tool.title
-          btn.style.cssText = `
-            width: 40px;
-            height: 40px;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            background: white;
-            cursor: pointer;
-            font-size: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-          `
-          
+        // Event Listener für Farb-Buttons
+        container.querySelectorAll('.color-btn').forEach(btn => {
           L.DomEvent.on(btn, 'click', function(e) {
             L.DomEvent.stopPropagation(e)
-            
-            // Wenn Button bereits aktiv ist, deaktivieren
-            const isActive = btn.style.background === 'rgb(59, 130, 246)'
-            
-            // Alle Tools deaktivieren
-            map.pm.disableDraw()
-            map.pm.disableGlobalEditMode()
-            map.pm.disableGlobalDragMode()
-            map.pm.disableGlobalRemovalMode()
+            const color = this.getAttribute('data-color')
             
             // Alle Buttons zurücksetzen
-            container.querySelectorAll('.tool-btn').forEach(b => {
-              b.style.background = 'white'
-              b.style.borderColor = '#e5e7eb'
-            })
-            
-            // Wenn nicht aktiv war, aktivieren
-            if (!isActive) {
-              btn.style.background = '#3B82F6'
-              btn.style.borderColor = '#2563EB'
-              
-              // Tool aktivieren
-              if (tool.action === 'Edit') {
-                map.pm.enableGlobalEditMode()
-              } else if (tool.action === 'Drag') {
-                map.pm.enableGlobalDragMode()
-              } else if (tool.action === 'Remove') {
-                map.pm.enableGlobalRemovalMode()
-              } else {
-                // Geoman verwendet andere Namen!
-                const actionMap = {
-                  'Line': 'Line',
-                  'Rectangle': 'Rectangle',
-                  'Polygon': 'Polygon',
-                  'Circle': 'Circle'
-                }
-                map.pm.enableDraw(actionMap[tool.action] || tool.action, {
-                  pathOptions: {
-                    color: currentColor,
-                    fillColor: currentColor,
-                    fillOpacity: 0.4,
-                    weight: 3
-                  }
-                })
-              }
-            }
-          })
-          
-          L.DomEvent.on(btn, 'mouseenter', function() {
-            if (btn.style.background !== 'rgb(59, 130, 246)') {
-              btn.style.background = '#f3f4f6'
-            }
-          })
-          
-          L.DomEvent.on(btn, 'mouseleave', function() {
-            if (btn.style.background !== 'rgb(59, 130, 246)') {
-              btn.style.background = 'white'
-            }
-          })
-        })
-        
-        // Trennlinie
-        const divider = L.DomUtil.create('div', '', container)
-        divider.style.cssText = 'height: 1px; background: #e5e7eb; margin: 4px 0;'
-        
-        // Farben
-        const colors = ['#EF4444', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#000000']
-        colors.forEach((color, index) => {
-          const colorBtn = L.DomUtil.create('button', 'color-btn', container)
-          colorBtn.style.cssText = `
-            width: 40px;
-            height: 40px;
-            border: ${index === 0 ? '3px' : '2px'} solid ${index === 0 ? '#000' : '#e5e7eb'};
-            border-radius: 8px;
-            background: ${color};
-            cursor: pointer;
-            transition: all 0.2s;
-          `
-          
-          L.DomEvent.on(colorBtn, 'click', function(e) {
-            L.DomEvent.stopPropagation(e)
-            currentColor = color
-            
-            // Alle Farb-Buttons zurücksetzen
             container.querySelectorAll('.color-btn').forEach(b => {
-              b.style.border = '2px solid #e5e7eb'
+              b.style.border = '2px solid #ccc'
             })
-            colorBtn.style.border = '3px solid #000'
+            // Ausgewählten Button markieren
+            this.style.border = '3px solid #000'
             
-            // Farbe aktualisieren
+            // Farbe für neue Shapes setzen
             map.pm.setGlobalOptions({
               pathOptions: {
                 color: color,
                 fillColor: color,
                 fillOpacity: 0.4,
-                weight: 3
-              }
+                weight: 3,
+              },
             })
           })
-        })
-        
-        // Trennlinie 2
-        const divider2 = L.DomUtil.create('div', '', container)
-        divider2.style.cssText = 'height: 1px; background: #e5e7eb; margin: 4px 0;'
-        
-        // Zoom Buttons mit Lucide Icons
-        const zoomIn = L.DomUtil.create('button', 'zoom-btn', container)
-        zoomIn.innerHTML = renderToString(<PlusIcon size={18} />)
-        zoomIn.title = 'Hineinzoomen'
-        zoomIn.style.cssText = `
-          width: 40px;
-          height: 40px;
-          border: 2px solid #e5e7eb;
-          border-radius: 8px;
-          background: white;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: all 0.2s;
-        `
-        L.DomEvent.on(zoomIn, 'click', function(e) {
-          L.DomEvent.stopPropagation(e)
-          map.zoomIn()
-        })
-        L.DomEvent.on(zoomIn, 'mouseenter', function() {
-          zoomIn.style.background = '#f3f4f6'
-        })
-        L.DomEvent.on(zoomIn, 'mouseleave', function() {
-          zoomIn.style.background = 'white'
-        })
-        
-        const zoomOut = L.DomUtil.create('button', 'zoom-btn', container)
-        zoomOut.innerHTML = renderToString(<MinusIcon size={18} />)
-        zoomOut.title = 'Herauszoomen'
-        zoomOut.style.cssText = `
-          width: 40px;
-          height: 40px;
-          border: 2px solid #e5e7eb;
-          border-radius: 8px;
-          background: white;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: all 0.2s;
-        `
-        L.DomEvent.on(zoomOut, 'click', function(e) {
-          L.DomEvent.stopPropagation(e)
-          map.zoomOut()
-        })
-        L.DomEvent.on(zoomOut, 'mouseenter', function() {
-          zoomOut.style.background = '#f3f4f6'
-        })
-        L.DomEvent.on(zoomOut, 'mouseleave', function() {
-          zoomOut.style.background = 'white'
         })
         
         return container
       }
     })
 
-    const toolbar = new UnifiedToolbar({ position: 'topleft' })
-    map.addControl(toolbar)
+    const colorControl = new ColorControl({ position: 'topleft' })
+    map.addControl(colorControl)
 
-    // 🗺️ LAYER SWITCHER - Schönes Design
+    // Layer Switcher - Verschiedene Kartenansichten
     const LayerControl = L.Control.extend({
       onAdd: function() {
-        const container = L.DomUtil.create('div', 'layer-control')
-        container.style.cssText = `
-          background: white;
-          padding: 12px;
-          border-radius: 12px;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-          min-width: 150px;
-        `
+        const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control')
+        container.style.background = 'white'
+        container.style.padding = '10px'
+        container.style.borderRadius = '8px'
+        container.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)'
         container.innerHTML = `
-          <div style="display: flex; flex-direction: column; gap: 8px;">
-            <p style="font-size: 13px; font-weight: 700; margin: 0 0 4px 0; text-align: center; color: #1e293b;">Kartenansicht</p>
-            <button id="layer-street" class="layer-btn active" style="padding: 10px 14px; background: #3B82F6; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; box-shadow: 0 2px 4px rgba(59,130,246,0.3);">🗺️ Straße</button>
-            <button id="layer-satellite" class="layer-btn" style="padding: 10px 14px; background: #f1f5f9; color: #334155; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;">🛰️ Satellit</button>
-            <button id="layer-topo" class="layer-btn" style="padding: 10px 14px; background: #f1f5f9; color: #334155; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;">⛰️ Topografie</button>
+          <div style="display: flex; flex-direction: column; gap: 8px; min-width: 140px;">
+            <p style="font-size: 12px; font-weight: bold; margin: 0 0 4px 0; text-align: center; color: #334155;">Kartenansicht</p>
+            <button id="layer-street" class="layer-btn active" style="padding: 8px 12px; background: #3B82F6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.2s;">🗺️ Straße</button>
+            <button id="layer-satellite" class="layer-btn" style="padding: 8px 12px; background: #E2E8F0; color: #334155; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.2s;">🛰️ Satellit</button>
+            <button id="layer-topo" class="layer-btn" style="padding: 8px 12px; background: #E2E8F0; color: #334155; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.2s;">⛰️ Topografie</button>
           </div>
         `
         
@@ -320,14 +177,12 @@ const DrawControl = () => {
         
         const setActiveButton = (activeBtn) => {
           [streetBtn, satelliteBtn, topoBtn].forEach(btn => {
-            btn.style.background = '#f1f5f9'
+            btn.style.background = '#E2E8F0'
             btn.style.color = '#334155'
-            btn.style.boxShadow = 'none'
             btn.classList.remove('active')
           })
           activeBtn.style.background = '#3B82F6'
           activeBtn.style.color = 'white'
-          activeBtn.style.boxShadow = '0 2px 4px rgba(59,130,246,0.3)'
           activeBtn.classList.add('active')
         }
         
@@ -362,8 +217,57 @@ const DrawControl = () => {
     const layerControl = new LayerControl({ position: 'bottomright' })
     map.addControl(layerControl)
 
-    // Export wird jetzt mit html2canvas in Toolbar.jsx gemacht
-    // Keine zusätzliche Bibliothek nötig!
+    // Simple Map Screenshoter - Professionelle Screenshot-Bibliothek
+    const screenshoter = new SimpleMapScreenshoter({
+      hidden: true, // Verstecke den Button
+      preventDownload: true, // Wir machen Download selbst
+      hideElementsWithSelectors: ['.leaflet-control-container'], // Versteckt ALLE Controls
+      cropImageByInnerWH: true, // Schneide leere Bereiche ab
+      mimeType: 'image/png',
+      domtoimageOptions: {
+        // Wichtig: Verhindert Tile-Grenzen im Screenshot
+        style: {
+          'image-rendering': 'auto',
+          '-webkit-font-smoothing': 'antialiased'
+        }
+      }
+    }).addTo(map)
+    
+    // Entferne Tile-Grenzen und Marker-Rahmen vor dem Screenshot
+    map.on('simpleMapScreenshoter.takeScreen', () => {
+      // Entferne alle Tile-Grenzen
+      const tiles = document.querySelectorAll('.leaflet-tile')
+      tiles.forEach(tile => {
+        tile.style.border = 'none'
+        tile.style.outline = 'none'
+      })
+      
+      // Entferne ALLE Rahmen und Boxen um Marker
+      const markers = document.querySelectorAll('.leaflet-marker-icon, .leaflet-marker-icon > div, .custom-marker, .custom-marker > div')
+      markers.forEach(marker => {
+        marker.style.border = 'none'
+        marker.style.outline = 'none'
+        marker.style.boxShadow = 'none'
+        marker.style.background = 'transparent'
+        
+        // Entferne auch alle Child-Divs die Rahmen haben könnten
+        const children = marker.querySelectorAll('div')
+        children.forEach(child => {
+          if (child.style.border || child.style.outline || child.style.background) {
+            child.style.border = 'none'
+            child.style.outline = 'none'
+            child.style.boxShadow = 'none'
+            // Nur wenn es NICHT das Icon-Bild ist
+            if (!child.querySelector('img')) {
+              child.style.background = 'transparent'
+            }
+          }
+        })
+      })
+    })
+
+    // Mache Screenshoter global verfügbar
+    window.mapScreenshoter = screenshoter
 
     // Deutsche Übersetzungen
     map.pm.setLang('de', {
@@ -667,11 +571,17 @@ const DropZone = ({ onAddSymbol, onAddImage, isLocked }) => {
     drop: (item, monitor) => {
       if (isLocked) return
       
-      // ✅ ALLE TOOLS AUTOMATISCH DEAKTIVIEREN!
-      map.pm.disableDraw()
-      map.pm.disableGlobalEditMode()
-      map.pm.disableGlobalDragMode()
-      map.pm.disableGlobalRemovalMode()
+      // ✅ ALLE GEOMAN TOOLS AUTOMATISCH DEAKTIVIEREN!
+      try {
+        map.pm.disableDraw()
+        map.pm.disableGlobalEditMode()
+        map.pm.disableGlobalDragMode()
+        map.pm.disableGlobalRemovalMode()
+        map.pm.disableGlobalCutMode()
+        console.log('✅ Alle Zeichen-Tools deaktiviert für Drag & Drop')
+      } catch (e) {
+        console.warn('⚠️ Konnte Tools nicht deaktivieren:', e)
+      }
       
       const offset = monitor.getClientOffset()
       if (!offset) return
@@ -690,7 +600,7 @@ const DropZone = ({ onAddSymbol, onAddImage, isLocked }) => {
         position: { lat: containerPoint.lat, lng: containerPoint.lng }
       })
     }
-  }), [map, isLocked])
+  }), [map, isLocked, onAddSymbol])
 
   useMapEvents({
     click(e) {
@@ -808,11 +718,11 @@ const MapComponent = forwardRef(({
       zoomControl={!isLocked}
       dragging={!isLocked}
       scrollWheelZoom={!isLocked}
-      preferCanvas={true}
     >
       {/* TileLayer wird jetzt vom Layer-Switcher gesteuert */}
       
       <DrawControl />
+      <ZoomControl />
       
       <DropZone onAddSymbol={onAddSymbol} onAddImage={onAddImage} isLocked={isLocked} />
 

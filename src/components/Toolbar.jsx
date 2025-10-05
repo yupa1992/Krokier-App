@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Clock, Maximize, Minimize, Upload, Lock, Unlock, Settings, Download, Menu, X, FilePlus } from 'lucide-react'
-import html2canvas from 'html2canvas'
+import domtoimage from 'dom-to-image-more'
 import jsPDF from 'jspdf'
 
 const Toolbar = ({ onNewDrawing, onLoad, onToggleFullscreen, isFullscreen, mapRef, isMapLocked, onToggleLock, onShowAdmin, logo }) => {
@@ -43,58 +43,74 @@ const Toolbar = ({ onNewDrawing, onLoad, onToggleFullscreen, isFullscreen, mapRe
     setShowExportMenu(false)
     
     try {
+      console.log('🖼️ Starte PNG Export mit leaflet-simple-map-screenshoter...')
+      
+      // Warte kurz bis Karte sicher geladen ist
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      if (!mapRef || !mapRef.current) {
+        throw new Error('Karte nicht gefunden. Bitte warten Sie 2 Sekunden und versuchen Sie es erneut.')
+      }
+      
+      const map = mapRef.current
+      
+      // Prüfe ob SimpleMapScreenshoter verfügbar ist
+      if (!window.mapScreenshoter) {
+        console.warn('⚠️ SimpleMapScreenshoter nicht initialisiert, warte 2 Sekunden...')
+        await new Promise(resolve => setTimeout(resolve, 2000))
+        
+        if (!window.mapScreenshoter) {
+          throw new Error('Export-Bibliothek nicht geladen. Bitte laden Sie die Seite neu.')
+        }
+      }
+      
+      console.log('✅ SimpleMapScreenshoter gefunden, starte Export...')
+      
       const now = new Date()
       const datum = formatDate(now)
       const zeit = formatTime(now)
-      const ort = einsatzort || 'Krokier Karte'
+      const ort = einsatzort || 'Einsatzort nicht angegeben'
       
-      // Verstecke UI-Elemente
-      const sidebar = document.querySelector('.w-80, .w-96')
-      const toolbar = document.querySelector('.absolute.top-0')
-      if (sidebar) sidebar.style.display = 'none'
-      if (toolbar) toolbar.style.display = 'none'
+      const options = {
+        mimeType: 'image/png',
+        caption: `${ort} | ${datum} ${zeit}`,
+        captionFontSize: 18,
+        captionFont: 'bold Arial, sans-serif',
+        captionColor: '#FFFFFF',
+        captionBgColor: 'rgba(0, 0, 0, 0.8)',
+        captionOffset: 15,
+        hideElementsWithSelectors: [
+          '.leaflet-control-container',
+          '.leaflet-top',
+          '.leaflet-bottom'
+        ]
+      }
       
-      // Warte kurz
-      await new Promise(resolve => setTimeout(resolve, 300))
-      
-      // Finde Leaflet Container
-      const mapContainer = document.querySelector('.leaflet-container')
-      if (!mapContainer) throw new Error('Karte nicht gefunden')
-      
-      // Screenshot mit html2canvas
-      const canvas = await html2canvas(mapContainer, {
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        scale: 2,
-        logging: false
-      })
-      
-      // Zeige UI wieder
-      if (sidebar) sidebar.style.display = ''
-      if (toolbar) toolbar.style.display = ''
+      const blob = await window.mapScreenshoter.takeScreen('png', options)
       
       // Download
-      canvas.toBlob((blob) => {
-        const link = document.createElement('a')
-        const filename = `${ort.replace(/[^a-zA-Z0-9]/g, '_')}-${datum.replace(/\./g, '-')}-${zeit.replace(/:/g, '-')}.png`
-        link.download = filename
-        link.href = URL.createObjectURL(blob)
-        link.click()
-        setTimeout(() => URL.revokeObjectURL(link.href), 100)
-        
-        console.log(`✅ Exportiert: ${filename}`)
-      })
+      const link = document.createElement('a')
+      const date = new Date().toISOString().split('T')[0]
+      const time = new Date().toTimeString().split(' ')[0].replace(/:/g, '-')
+      const filename = einsatzort ? 
+        `${einsatzort.replace(/[^a-zA-Z0-9]/g, '_')}-${date}-${time}.png` : 
+        `Krokier_Karte-${date}-${time}.png`
+      
+      link.download = filename
+      link.href = URL.createObjectURL(blob)
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      
+      // Cleanup
+      setTimeout(() => URL.revokeObjectURL(link.href), 100)
+      
+      console.log(`✅ PNG Export erfolgreich: ${filename}`)
+      alert(`✅ Karte erfolgreich exportiert!\n\nDatei: ${filename}`)
       
     } catch (error) {
-      // UI wiederherstellen
-      const sidebar = document.querySelector('.w-80, .w-96')
-      const toolbar = document.querySelector('.absolute.top-0')
-      if (sidebar) sidebar.style.display = ''
-      if (toolbar) toolbar.style.display = ''
-      
-      console.error('Export-Fehler:', error)
-      alert(`❌ Export fehlgeschlagen: ${error.message}`)
+      console.error('❌ PNG Export Fehler:', error)
+      alert(`❌ Export fehlgeschlagen!\n\nFehler: ${error.message}\n\nLösungen:\n• Warten Sie bis die Karte vollständig geladen ist\n• Laden Sie die Seite neu (F5)\n• Überprüfen Sie Ihre Internetverbindung`)
     }
   }
 
@@ -278,6 +294,14 @@ const Toolbar = ({ onNewDrawing, onLoad, onToggleFullscreen, isFullscreen, mapRe
               >
                 <FilePlus className="w-4 h-4" />
                 <span>Neue Zeichnung</span>
+              </button>
+
+              <button
+                onClick={() => { onSearchLocation(); setShowMobileMenu(false); }}
+                className="flex items-center justify-center space-x-2 bg-blue-600 px-3 py-2 rounded-lg text-sm"
+              >
+                <MapPin className="w-4 h-4" />
+                <span>Standort</span>
               </button>
 
               <button
