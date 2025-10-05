@@ -209,12 +209,16 @@ body {
   pointer-events: auto !important;
   z-index: 400 !important;
   margin-top: 80px !important;
+  margin-bottom: 20px !important;
+  max-height: calc(100vh - 120px) !important;
+  overflow-y: auto !important;
 }
 
 /* Leaflet topleft Container auch nach unten */
 .leaflet-top.leaflet-left {
   top: 0 !important;
   padding-top: 80px !important;
+  padding-bottom: 20px !important;
 }
 
 .unified-toolbar button {

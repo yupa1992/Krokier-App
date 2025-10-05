@@ -140,7 +140,14 @@ const DrawControl = () => {
               } else if (tool.action === 'Remove') {
                 map.pm.enableGlobalRemovalMode()
               } else {
-                map.pm.enableDraw(tool.action, {
+                // Geoman verwendet andere Namen!
+                const actionMap = {
+                  'Line': 'Line',
+                  'Rectangle': 'Rectangle',
+                  'Polygon': 'Polygon',
+                  'Circle': 'Circle'
+                }
+                map.pm.enableDraw(actionMap[tool.action] || tool.action, {
                   pathOptions: {
                     color: currentColor,
                     fillColor: currentColor,
