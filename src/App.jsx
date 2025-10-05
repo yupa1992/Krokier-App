@@ -92,46 +92,10 @@ function App() {
     return () => window.removeEventListener('symbolsUpdated', updateSymbolNames)
   }, [])
 
-  // Geolocation tracking
-  useEffect(() => {
-    let watchId = null
-    
-    if (navigator.geolocation) {
-      // Erste Position sofort abrufen
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords
-          console.log('✅ Initiale Position:', latitude, longitude)
-          setUserLocation({ lat: latitude, lng: longitude })
-        },
-        (error) => {
-          // Fehler stumm - nicht kritisch
-          console.warn('⚠️ Geolocation nicht verfügbar:', error.code)
-        },
-        { enableHighAccuracy: false, timeout: 30000, maximumAge: 60000 }
-      )
-
-      // Dann kontinuierlich überwachen
-      watchId = navigator.geolocation.watchPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords
-          console.log('📍 Position Update:', latitude, longitude)
-          setUserLocation({ lat: latitude, lng: longitude })
-        },
-        (error) => {
-          // Fehler stumm - nicht kritisch
-          console.warn('⚠️ Geolocation-Watch:', error.code)
-        },
-        { enableHighAccuracy: false, maximumAge: 60000, timeout: 30000 }
-      )
-    }
-
-    return () => {
-      if (watchId) {
-        navigator.geolocation.clearWatch(watchId)
-      }
-    }
-  }, [])
+  // Geolocation tracking - DEAKTIVIERT (verursacht nur Fehler)
+  // useEffect(() => {
+  //   // Geolocation temporär deaktiviert
+  // }, [])
 
   const handleAddSymbol = (symbol) => {
     if (isMapLocked) return

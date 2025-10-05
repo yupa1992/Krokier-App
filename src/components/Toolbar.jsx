@@ -45,26 +45,30 @@ const Toolbar = ({ onNewDrawing, onLoad, onToggleFullscreen, isFullscreen, mapRe
       const zeit = formatTime(now)
       const ort = einsatzort || 'Krokier Karte'
       
-      // Verstecke Sidebar temporär
+      // Verstecke Sidebar & Toolbar temporär
       const sidebar = document.querySelector('.w-80, .w-96')
-      const sidebarDisplay = sidebar ? sidebar.style.display : null
+      const toolbar = document.querySelector('.absolute.top-0')
+      const sidebarDisplay = sidebar?.style.display
+      const toolbarDisplay = toolbar?.style.display
+      
       if (sidebar) sidebar.style.display = 'none'
+      if (toolbar) toolbar.style.display = 'none'
+      
+      // Warte kurz damit Layout neu berechnet wird
+      await new Promise(resolve => setTimeout(resolve, 100))
       
       const blob = await window.mapScreenshoter.takeScreen('png', {
         caption: `${ort} | ${datum} ${zeit}`,
-        captionFontSize: 18,
+        captionFontSize: 14,
         captionFont: 'bold Arial',
         captionColor: '#FFFFFF',
-        captionBgColor: 'rgba(0, 0, 0, 0.8)',
-        captionOffset: 15
+        captionBgColor: 'rgba(0, 0, 0, 0.7)',
+        captionOffset: 5
       })
       
-      // Zeige Sidebar wieder
-      if (sidebar && sidebarDisplay !== null) {
-        sidebar.style.display = sidebarDisplay
-      } else if (sidebar) {
-        sidebar.style.display = ''
-      }
+      // Zeige Sidebar & Toolbar wieder
+      if (sidebar) sidebar.style.display = sidebarDisplay || ''
+      if (toolbar) toolbar.style.display = toolbarDisplay || ''
       
       const link = document.createElement('a')
       const filename = `${ort.replace(/[^a-zA-Z0-9]/g, '_')}-${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.png`
@@ -76,9 +80,11 @@ const Toolbar = ({ onNewDrawing, onLoad, onToggleFullscreen, isFullscreen, mapRe
       alert(`✅ Exportiert: ${filename}`)
       
     } catch (error) {
-      // Stelle sicher dass Sidebar wieder da ist
+      // Stelle sicher dass Sidebar & Toolbar wieder da sind
       const sidebar = document.querySelector('.w-80, .w-96')
+      const toolbar = document.querySelector('.absolute.top-0')
       if (sidebar) sidebar.style.display = ''
+      if (toolbar) toolbar.style.display = ''
       
       alert(`❌ Export fehlgeschlagen: ${error.message}`)
     }
@@ -264,14 +270,6 @@ const Toolbar = ({ onNewDrawing, onLoad, onToggleFullscreen, isFullscreen, mapRe
               >
                 <FilePlus className="w-4 h-4" />
                 <span>Neue Zeichnung</span>
-              </button>
-
-              <button
-                onClick={() => { onSearchLocation(); setShowMobileMenu(false); }}
-                className="flex items-center justify-center space-x-2 bg-blue-600 px-3 py-2 rounded-lg text-sm"
-              >
-                <MapPin className="w-4 h-4" />
-                <span>Standort</span>
               </button>
 
               <button

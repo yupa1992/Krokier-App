@@ -218,7 +218,7 @@ const DrawControl = () => {
     const layerControl = new LayerControl({ position: 'bottomright' })
     map.addControl(layerControl)
 
-    // Simple Map Screenshoter - Professionelle Screenshot-Bibliothek
+    // Simple Map Screenshoter - NUR die Karte, nicht der ganze Viewport
     const screenshoter = new SimpleMapScreenshoter({
       hidden: true,
       preventDownload: true,
@@ -229,8 +229,8 @@ const DrawControl = () => {
         '.leaflet-bar',
         '.leaflet-control'
       ],
-      cropImageByInnerWH: false,
-      mimeType: 'image/png'
+      cropImageByInnerWH: true,
+      screenName: 'karte'
     }).addTo(map)
     
     // Entferne Tile-Grenzen und Marker-Rahmen vor dem Screenshot
