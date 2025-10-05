@@ -79,15 +79,15 @@ const DrawControl = () => {
         
         let currentColor = '#EF4444'
         
-        // Zeichnen-Tools
+        // Zeichnen-Tools - EINFACHE Text-Icons die funktionieren!
         const tools = [
-          { icon: '✏️', title: 'Linie', action: 'Line' },
-          { icon: '▭', title: 'Rechteck', action: 'Rectangle' },
-          { icon: '⬟', title: 'Polygon', action: 'Polygon' },
-          { icon: '⭕', title: 'Kreis', action: 'Circle' },
+          { icon: '/', title: 'Linie zeichnen (mit Meter)', action: 'Line' },
+          { icon: '□', title: 'Rechteck', action: 'Rectangle' },
+          { icon: '⬡', title: 'Polygon', action: 'Polygon' },
+          { icon: '○', title: 'Kreis', action: 'Circle' },
           { icon: '✎', title: 'Bearbeiten', action: 'Edit' },
-          { icon: '↔', title: 'Verschieben', action: 'Drag' },
-          { icon: '🗑️', title: 'Löschen', action: 'Remove' }
+          { icon: '⇄', title: 'Verschieben', action: 'Drag' },
+          { icon: '✕', title: 'Löschen', action: 'Remove' }
         ]
         
         tools.forEach(tool => {
