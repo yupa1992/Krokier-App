@@ -604,11 +604,11 @@ const DraggableMarker = ({ symbol, onUpdate, onDelete, isLocked }) => {
         ${isSelected ? `
           <div class="rotation-handle" style="position: absolute; top: -38px; left: 50%; transform: translateX(-50%); width: 32px; height: 32px; background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); border: 3px solid white; border-radius: 50%; cursor: grab; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 1000; display: flex; align-items: center; justify-content: center; font-size: 18px; color: white; font-weight: bold;">⟲</div>
         ` : ''}
-        <img src="${symbol.icon}" style="position: relative; z-index: 10; width: 32px; height: 32px; transform: rotate(${rotation}deg); border: none !important; outline: none !important; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));" />
+        <img src="${symbol.icon}" style="position: relative; z-index: 10; width: 48px; height: 48px; transform: rotate(${rotation}deg); border: none !important; outline: none !important; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));" />
       </div>
     `,
-    iconSize: [32, 32],
-    iconAnchor: [16, 16]  // Zentriert statt unten - Icons bleiben jetzt an der richtigen Position
+    iconSize: [48, 48],
+    iconAnchor: [24, 24]
   })
 
   const handleDragEnd = (e) => {

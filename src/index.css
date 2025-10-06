@@ -232,3 +232,17 @@ body {
   top: 0 !important;
   padding-top: 80px !important;
 }
+
+/* Symbole beim Zeichnen ignorieren - Klicks durchlassen */
+.leaflet-marker-pane.leaflet-zoom-animated {
+  pointer-events: none !important;
+}
+
+.leaflet-marker-pane .custom-marker {
+  pointer-events: auto !important;
+}
+
+/* Beim Zeichnen: Symbole komplett ignorieren */
+body.leaflet-pm-drawing .leaflet-marker-pane {
+  pointer-events: none !important;
+}
