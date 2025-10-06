@@ -8,8 +8,8 @@ const AdminPanelPro = ({ onClose, logo, onLogoChange }) => {
     return saved ? JSON.parse(saved) : {
       appName: 'Krokier App',
       defaultZoom: 13,
-      maxZoom: 18,
-      minZoom: 5,
+      maxZoom: 22,
+      minZoom: 1,
       enableGeolocation: true,
       showCoordinates: false,
       measurementUnit: 'metric'
@@ -96,7 +96,7 @@ const AdminPanelPro = ({ onClose, logo, onLogoChange }) => {
                 onChange={(e) => setSettings({ ...settings, defaultZoom: parseInt(e.target.value) })}
                 className="w-full px-4 py-2 border rounded-lg"
                 min="1"
-                max="18"
+                max="22"
               />
             </div>
             <div>
@@ -107,7 +107,7 @@ const AdminPanelPro = ({ onClose, logo, onLogoChange }) => {
                 onChange={(e) => setSettings({ ...settings, maxZoom: parseInt(e.target.value) })}
                 className="w-full px-4 py-2 border rounded-lg"
                 min="1"
-                max="20"
+                max="22"
               />
             </div>
             <div>
@@ -118,7 +118,7 @@ const AdminPanelPro = ({ onClose, logo, onLogoChange }) => {
                 onChange={(e) => setSettings({ ...settings, minZoom: parseInt(e.target.value) })}
                 className="w-full px-4 py-2 border rounded-lg"
                 min="1"
-                max="10"
+                max="22"
               />
             </div>
           </div>

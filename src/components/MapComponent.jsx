@@ -965,6 +965,8 @@ const MapComponent = forwardRef(({
     <MapContainer
       center={[51.1657, 10.4515]}
       zoom={13}
+      maxZoom={22}
+      minZoom={1}
       className="h-full w-full"
       ref={mapRef}
       zoomControl={!isLocked}
