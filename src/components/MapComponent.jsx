@@ -254,139 +254,137 @@ const DrawControl = () => {
           zoomOutBtn.style.background = 'white'
         })
         
-        // 📍 GEOLOCATION BUTTON
-        const locateBtn = L.DomUtil.create('button', 'locate-btn', container)
-        locateBtn.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="12" r="3" fill="currentColor"/><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/><line x1="12" y1="1" x2="12" y2="4" stroke="currentColor" stroke-width="2"/><line x1="12" y1="20" x2="12" y2="23" stroke="currentColor" stroke-width="2"/><line x1="1" y1="12" x2="4" y2="12" stroke="currentColor" stroke-width="2"/><line x1="20" y1="12" x2="23" y2="12" stroke="currentColor" stroke-width="2"/></svg>'
-        locateBtn.title = 'Meine Position'
-        locateBtn.style.cssText = `
-          width: 36px;
-          height: 36px;
-          border: 2px solid #e5e7eb;
-          border-radius: 6px;
-          background: white;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: all 0.2s;
-        `
-        
-        let locationMarker = null
-        let locationCircle = null
-        
-        L.DomEvent.on(locateBtn, 'click', function(e) {
-          L.DomEvent.stopPropagation(e)
-          
-          // Prüfe ob Geolocation verfügbar ist
-          if (!navigator.geolocation) {
-            alert('⚠️ Geolocation wird von Ihrem Browser nicht unterstützt!')
-            return
-          }
-          
-          // Zeige Loading
-          locateBtn.style.background = '#3B82F6'
-          locateBtn.style.borderColor = '#2563EB'
-          
-          // Verwende Browser Geolocation API direkt
-          navigator.geolocation.getCurrentPosition(
-            function(position) {
-              const lat = position.coords.latitude
-              const lng = position.coords.longitude
-              const accuracy = position.coords.accuracy
-              
-              // Entferne alte Marker
-              if (locationMarker) map.removeLayer(locationMarker)
-              if (locationCircle) map.removeLayer(locationCircle)
-              
-              // Neuer Marker
-              locationMarker = L.marker([lat, lng], {
-                icon: L.divIcon({
-                  className: 'location-marker',
-                  html: '<div style="width: 20px; height: 20px; background: #3B82F6; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(59,130,246,0.5);"></div>',
-                  iconSize: [20, 20],
-                  iconAnchor: [10, 10]
-                })
-              }).addTo(map)
-              
-              // Genauigkeits-Kreis
-              locationCircle = L.circle([lat, lng], {
-                radius: accuracy,
-                color: '#3B82F6',
-                fillColor: '#3B82F6',
-                fillOpacity: 0.15,
-                weight: 2
-              }).addTo(map)
-              
-              // Zoom zur Position
-              map.setView([lat, lng], 16)
-              
-              // Button grün
-              locateBtn.style.background = '#10B981'
-              locateBtn.style.borderColor = '#059669'
-              
-              setTimeout(() => {
-                locateBtn.style.background = 'white'
-                locateBtn.style.borderColor = '#e5e7eb'
-              }, 2000)
-              
-              console.log('✅ Position gefunden:', lat, lng, 'Genauigkeit:', accuracy, 'm')
-            },
-            function(error) {
-              console.error('❌ Geolocation Error:', error)
-              
-              // Button rot
-              locateBtn.style.background = '#EF4444'
-              locateBtn.style.borderColor = '#DC2626'
-              
-              setTimeout(() => {
-                locateBtn.style.background = 'white'
-                locateBtn.style.borderColor = '#e5e7eb'
-              }, 2000)
-              
-              let errorMsg = '⚠️ Standort konnte nicht ermittelt werden!\n\n'
-              
-              switch(error.code) {
-                case error.PERMISSION_DENIED:
-                  errorMsg += 'Sie haben den Standortzugriff verweigert.\n\nBitte erlauben Sie den Standortzugriff in Ihren Browser-Einstellungen.'
-                  break
-                case error.POSITION_UNAVAILABLE:
-                  errorMsg += 'Standortinformationen sind nicht verfügbar.'
-                  break
-                case error.TIMEOUT:
-                  errorMsg += 'Die Anfrage ist abgelaufen. Bitte versuchen Sie es erneut.'
-                  break
-                default:
-                  errorMsg += 'Ein unbekannter Fehler ist aufgetreten.'
-              }
-              
-              alert(errorMsg)
-            },
-            {
-              enableHighAccuracy: true,
-              timeout: 10000,
-              maximumAge: 0
-            }
-          )
-        })
-        
-        L.DomEvent.on(locateBtn, 'mouseenter', function() {
-          if (locateBtn.style.background === 'white' || locateBtn.style.background === '') {
-            locateBtn.style.background = '#f3f4f6'
-          }
-        })
-        
-        L.DomEvent.on(locateBtn, 'mouseleave', function() {
-          if (locateBtn.style.background === 'rgb(243, 244, 246)') {
-            locateBtn.style.background = 'white'
-          }
-        })
-        
         return container
       }
     })
 
     const customToolbar = new CustomToolbar({ position: 'topleft' })
     map.addControl(customToolbar)
+
+    // 🔍 SUCHFUNKTION wie Google Maps!
+    const SearchControl = L.Control.extend({
+      onAdd: function() {
+        const container = L.DomUtil.create('div', 'search-control')
+        container.style.cssText = `
+          background: white;
+          padding: 8px;
+          border-radius: 8px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+          min-width: 300px;
+        `
+        
+        const searchInput = L.DomUtil.create('input', '', container)
+        searchInput.type = 'text'
+        searchInput.placeholder = '🔍 Adresse, Ort oder Gebäude suchen...'
+        searchInput.style.cssText = `
+          width: 100%;
+          padding: 8px 12px;
+          border: 2px solid #e5e7eb;
+          border-radius: 6px;
+          font-size: 14px;
+          outline: none;
+        `
+        
+        const resultsDiv = L.DomUtil.create('div', '', container)
+        resultsDiv.style.cssText = `
+          max-height: 200px;
+          overflow-y: auto;
+          margin-top: 4px;
+          display: none;
+        `
+        
+        let searchMarker = null
+        let searchTimeout = null
+        
+        // Suche bei Eingabe
+        L.DomEvent.on(searchInput, 'input', function(e) {
+          L.DomEvent.stopPropagation(e)
+          const query = searchInput.value.trim()
+          
+          if (query.length < 3) {
+            resultsDiv.style.display = 'none'
+            return
+          }
+          
+          // Debounce
+          clearTimeout(searchTimeout)
+          searchTimeout = setTimeout(async () => {
+            try {
+              const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`)
+              const results = await response.json()
+              
+              if (results.length === 0) {
+                resultsDiv.innerHTML = '<div style="padding: 8px; color: #6b7280;">Keine Ergebnisse gefunden</div>'
+                resultsDiv.style.display = 'block'
+                return
+              }
+              
+              resultsDiv.innerHTML = ''
+              resultsDiv.style.display = 'block'
+              
+              results.forEach(result => {
+                const item = L.DomUtil.create('div', '', resultsDiv)
+                item.style.cssText = `
+                  padding: 8px;
+                  cursor: pointer;
+                  border-bottom: 1px solid #e5e7eb;
+                  transition: background 0.2s;
+                `
+                item.innerHTML = `
+                  <div style="font-weight: 600; font-size: 13px;">${result.display_name.split(',')[0]}</div>
+                  <div style="font-size: 11px; color: #6b7280;">${result.display_name}</div>
+                `
+                
+                L.DomEvent.on(item, 'mouseenter', function() {
+                  item.style.background = '#f3f4f6'
+                })
+                
+                L.DomEvent.on(item, 'mouseleave', function() {
+                  item.style.background = 'white'
+                })
+                
+                L.DomEvent.on(item, 'click', function(e) {
+                  L.DomEvent.stopPropagation(e)
+                  
+                  // Entferne alten Marker
+                  if (searchMarker) map.removeLayer(searchMarker)
+                  
+                  // Neuer Marker
+                  searchMarker = L.marker([result.lat, result.lon], {
+                    icon: L.divIcon({
+                      className: 'search-marker',
+                      html: '<div style="width: 30px; height: 30px; background: #EF4444; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(239,68,68,0.5);"></div>',
+                      iconSize: [30, 30],
+                      iconAnchor: [15, 15]
+                    })
+                  }).addTo(map)
+                  
+                  // Zoom zur Position
+                  map.setView([result.lat, result.lon], 17)
+                  
+                  // Verstecke Ergebnisse
+                  resultsDiv.style.display = 'none'
+                  searchInput.value = result.display_name.split(',')[0]
+                })
+              })
+            } catch (error) {
+              console.error('Search error:', error)
+              resultsDiv.innerHTML = '<div style="padding: 8px; color: #EF4444;">Fehler bei der Suche</div>'
+              resultsDiv.style.display = 'block'
+            }
+          }, 500)
+        })
+        
+        // Verhindere Map-Events
+        L.DomEvent.disableClickPropagation(container)
+        L.DomEvent.disableScrollPropagation(container)
+        
+        return container
+      }
+    })
+
+    const searchControl = new SearchControl({ position: 'topright' })
+    map.addControl(searchControl)
 
     // Layer Switcher - Verschiedene Kartenansichten
     const LayerControl = L.Control.extend({
