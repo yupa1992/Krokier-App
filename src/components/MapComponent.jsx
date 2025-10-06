@@ -597,18 +597,26 @@ const DraggableMarker = ({ symbol, onUpdate, onDelete, isLocked }) => {
     }
   }, [symbol.rotation])
 
+  const size = symbol.size || 48
+  
   const customIcon = L.divIcon({
     className: 'custom-marker',
     html: `
-      <div style="position: relative; width: 64px; height: 64px; background: transparent !important; border: none !important; outline: none !important; box-shadow: none !important;">
+      <div style="position: relative; width: ${size}px; height: ${size}px; pointer-events: auto;">
         ${isSelected ? `
-          <div class="rotation-handle" style="position: absolute; top: -38px; left: 50%; transform: translateX(-50%); width: 32px; height: 32px; background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); border: 3px solid white; border-radius: 50%; cursor: grab; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 1000; display: flex; align-items: center; justify-content: center; font-size: 18px; color: white; font-weight: bold;">⟲</div>
+          <div style="position: absolute; inset: -4px; border: 2px dashed #3B82F6; pointer-events: none;"></div>
+          <div class="resize-tl" style="position: absolute; top: -6px; left: -6px; width: 12px; height: 12px; background: white; border: 2px solid #3B82F6; border-radius: 50%; cursor: nwse-resize; z-index: 1001;"></div>
+          <div class="resize-tr" style="position: absolute; top: -6px; right: -6px; width: 12px; height: 12px; background: white; border: 2px solid #3B82F6; border-radius: 50%; cursor: nesw-resize; z-index: 1001;"></div>
+          <div class="resize-bl" style="position: absolute; bottom: -6px; left: -6px; width: 12px; height: 12px; background: white; border: 2px solid #3B82F6; border-radius: 50%; cursor: nesw-resize; z-index: 1001;"></div>
+          <div class="resize-br" style="position: absolute; bottom: -6px; right: -6px; width: 12px; height: 12px; background: white; border: 2px solid #3B82F6; border-radius: 50%; cursor: nwse-resize; z-index: 1001;"></div>
+          <div class="rotation-handle" style="position: absolute; top: -38px; left: 50%; transform: translateX(-50%); width: 24px; height: 24px; background: white; border: 2px solid #3B82F6; border-radius: 50%; cursor: grab; z-index: 1001; display: flex; align-items: center; justify-content: center; font-size: 14px;">⟲</div>
+          <div class="delete-handle" style="position: absolute; top: -6px; right: -6px; width: 20px; height: 20px; background: #EF4444; border: 2px solid white; border-radius: 50%; cursor: pointer; z-index: 1002; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: bold;">×</div>
         ` : ''}
-        <img src="${symbol.icon}" style="position: relative; z-index: 10; width: 48px; height: 48px; transform: rotate(${rotation}deg); border: none !important; outline: none !important; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));" />
+        <img src="${symbol.icon}" style="width: 100%; height: 100%; transform: rotate(${rotation}deg); filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));" />
       </div>
     `,
-    iconSize: [48, 48],
-    iconAnchor: [24, 24]
+    iconSize: [size, size],
+    iconAnchor: [size/2, size/2]
   })
 
   const handleDragEnd = (e) => {
@@ -704,6 +712,79 @@ const DraggableMarker = ({ symbol, onUpdate, onDelete, isLocked }) => {
     const timer = setTimeout(setupRotation, 100)
     return () => clearTimeout(timer)
   }, [isSelected, rotation])
+
+  // Resize und Delete Handlers
+  useEffect(() => {
+    if (!isSelected || !markerRef.current) return
+
+    const marker = markerRef.current
+    const markerElement = marker.getElement()
+    if (!markerElement) return
+
+    // Delete Handler
+    const deleteHandle = markerElement.querySelector('.delete-handle')
+    if (deleteHandle) {
+      const handleDelete = (e) => {
+        e.stopPropagation()
+        e.preventDefault()
+        if (window.confirm(`Symbol "${symbolName}" löschen?`)) {
+          onDelete(symbol.id)
+        }
+      }
+      deleteHandle.addEventListener('click', handleDelete)
+    }
+
+    // Resize Handlers (vereinfacht - nur Größe ändern)
+    const resizeHandles = markerElement.querySelectorAll('[class^="resize-"]')
+    let isResizing = false
+    let startSize = size
+
+    const handleResizeStart = (e) => {
+      e.stopPropagation()
+      e.preventDefault()
+      isResizing = true
+      startSize = size
+    }
+
+    const handleResizeMove = (e) => {
+      if (!isResizing) return
+      e.stopPropagation()
+      e.preventDefault()
+
+      const markerPos = marker.getLatLng()
+      const markerPixel = marker._map.latLngToContainerPoint(markerPos)
+      const mapRect = marker._map.getContainer().getBoundingClientRect()
+      
+      const mouseX = e.clientX - mapRect.left
+      const mouseY = e.clientY - mapRect.top
+
+      const distance = Math.sqrt(
+        Math.pow(mouseX - markerPixel.x, 2) + 
+        Math.pow(mouseY - markerPixel.y, 2)
+      )
+
+      const newSize = Math.max(24, Math.min(128, Math.round(distance * 2)))
+      onUpdate(symbol.id, { size: newSize })
+    }
+
+    const handleResizeEnd = () => {
+      isResizing = false
+    }
+
+    resizeHandles.forEach(handle => {
+      handle.addEventListener('mousedown', handleResizeStart)
+    })
+    document.addEventListener('mousemove', handleResizeMove)
+    document.addEventListener('mouseup', handleResizeEnd)
+
+    return () => {
+      resizeHandles.forEach(handle => {
+        handle.removeEventListener('mousedown', handleResizeStart)
+      })
+      document.removeEventListener('mousemove', handleResizeMove)
+      document.removeEventListener('mouseup', handleResizeEnd)
+    }
+  }, [isSelected, size, symbolName])
 
   return (
     <Marker
