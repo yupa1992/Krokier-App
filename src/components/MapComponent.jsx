@@ -405,23 +405,20 @@ const DrawControl = () => {
           </div>
         `
         
-        // Tile Layers mit maxZoom
+        // Tile Layers - NUR bis zu den verfügbaren Tiles!
         const streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution: '© OpenStreetMap',
-          maxZoom: 19,
-          maxNativeZoom: 19
+          maxZoom: 19
         })
         
         const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
           attribution: '© Esri',
-          maxZoom: 22,
-          maxNativeZoom: 19
+          maxZoom: 19
         })
         
         const topoLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
           attribution: '© OpenTopoMap',
-          maxZoom: 17,
-          maxNativeZoom: 17
+          maxZoom: 17
         })
         
         // Standard: Straße
@@ -971,7 +968,7 @@ const MapComponent = forwardRef(({
     <MapContainer
       center={[51.1657, 10.4515]}
       zoom={13}
-      maxZoom={22}
+      maxZoom={19}
       minZoom={1}
       className="h-full w-full"
       ref={mapRef}
