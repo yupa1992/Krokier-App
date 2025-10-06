@@ -405,17 +405,23 @@ const DrawControl = () => {
           </div>
         `
         
-        // Tile Layers
+        // Tile Layers mit maxZoom
         const streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '© OpenStreetMap'
+          attribution: '© OpenStreetMap',
+          maxZoom: 19,
+          maxNativeZoom: 19
         })
         
         const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-          attribution: '© Esri'
+          attribution: '© Esri',
+          maxZoom: 22,
+          maxNativeZoom: 19
         })
         
         const topoLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-          attribution: '© OpenTopoMap'
+          attribution: '© OpenTopoMap',
+          maxZoom: 17,
+          maxNativeZoom: 17
         })
         
         // Standard: Straße
